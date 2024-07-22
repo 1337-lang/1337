@@ -79,6 +79,38 @@ Lexer::tokenize()
 			return std::make_unique<Token>(token);
 		}
 
+		// Handle strings
+		if (c == '"') {
+			token.type = TokenType::String;
+			while (++this->cursor < this->content.length()) {
+				auto next = this->content[this->cursor];
+				if (next == '"') {
+					++this->cursor;
+					break;
+				}
+
+				token.value.push_back(next);
+			}
+
+			return std::make_unique<Token>(token);
+		}
+
+		// Handle characters
+		if (c == '\'') {
+			token.type = TokenType::Char;
+			while (++this->cursor < this->content.length()) {
+				auto next = this->content[this->cursor];
+				if (next == '\'') {
+					++this->cursor;
+					break;
+				}
+
+				token.value.push_back(next);
+			}
+
+			return std::make_unique<Token>(token);
+		}
+
 		// Handle symbols
 		if (symbols.find(c) != symbols.end()) {
 			token.type = symbols[c];

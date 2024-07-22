@@ -5,4 +5,8 @@ main := fn (argc: i32, argv: []str) {
 
 	mut value := 1000
 	value += 337
+
+	text := "hello world"
+	c := 'a'
+	bad_c := 'abcde'
 }

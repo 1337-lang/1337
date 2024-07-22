@@ -12,6 +12,8 @@ enum class TokenType: int {
 	// Values
 	Integer,
 	Float,
+	String,
+	Char,
 
 	// Keywords
 	Fn,

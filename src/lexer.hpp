@@ -45,7 +45,7 @@ private:
 	size_t cursor;
 public:
 	Lexer(std::string_view content);
-
+public:
 	std::unique_ptr<Token>
 	tokenize();
 };

@@ -1,4 +1,5 @@
 main := fn (argc: i32, argv: []str) {
 	a : i32 = 42
 	b := 1337
+	pi := 3.1415926535
 }

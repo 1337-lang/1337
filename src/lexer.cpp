@@ -9,7 +9,7 @@ Lexer::Lexer(std::string_view content)
 std::unique_ptr<Token>
 Lexer::tokenize()
 {
-	std::unique_ptr<Token> token = nullptr;
+	Token token;
 
 	while (this->cursor < this->content.length()) {
 		auto c = this->content[this->cursor];
@@ -22,27 +22,51 @@ Lexer::tokenize()
 
 		// Handle numbers
 		if (std::isdigit(c) || c == '.') {
-			TokenType type = TokenType::Integer;
-			std::string value;
+			token.type = TokenType::Integer;
 			for (; this->cursor < this->content.length(); ++this->cursor) {
 				auto next = content[this->cursor];
 				if (next == '.') {
-					type = TokenType::Float;
-					value.push_back(next);
+					token.type = TokenType::Float;
+					token.value.push_back(next);
 				} else if (std::isdigit(next)) {
-					value.push_back(next);
+					token.value.push_back(next);
 				} else {
 					break;
 				}
 			}
 
-			token = std::make_unique<Token>(Token { type, value });
-			break;
+			return std::make_unique<Token>(token);
+		}
+
+		// Handle identifiers
+		if (std::isalpha(c)) {
+			token.type = TokenType::Identifier;
+			token.value = std::string(1, c);
+			while (++this->cursor < this->content.length()) {
+				auto next = this->content[this->cursor];
+				if (!std::isalnum(next) && next != '_') {
+					break;
+				}
+
+				token.value.push_back(next);
+			}
+
+			return std::make_unique<Token>(token);
 		}
 
 		// Handle unknown
-		++this->cursor;
+		token.type = TokenType::Unknown;
+		for (; this->cursor < this->content.length(); ++this->cursor) {
+			auto next = this->content[this->cursor];
+			if (std::isspace(next)) {
+				break;
+			}
+
+			token.value.push_back(next);
+		}
+
+		return std::make_unique<Token>(token);
 	}
 
-	return token;
+	return nullptr;
 }

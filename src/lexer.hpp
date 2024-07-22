@@ -9,6 +9,7 @@ enum class TokenType: int {
 	Unknown,
 	Identifier,
 
+	// Values
 	Integer,
 	Float,
 };

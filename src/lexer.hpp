@@ -12,6 +12,10 @@ enum class TokenType: int {
 	// Values
 	Integer,
 	Float,
+
+	// Keywords
+	Fn,
+	Mut,
 };
 
 struct Token {

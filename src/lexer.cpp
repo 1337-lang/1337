@@ -1,4 +1,5 @@
 #include "lexer.hpp"
+#include <unordered_map>
 
 Lexer::Lexer(std::string_view content)
 {
@@ -40,6 +41,11 @@ Lexer::tokenize()
 
 		// Handle identifiers
 		if (std::isalpha(c)) {
+			static std::unordered_map<std::string, TokenType> keywords = {
+				{ "fn", TokenType::Fn },
+				{ "mut", TokenType::Mut }
+			};
+
 			token.type = TokenType::Identifier;
 			token.value = std::string(1, c);
 			while (++this->cursor < this->content.length()) {
@@ -50,6 +56,9 @@ Lexer::tokenize()
 
 				token.value.push_back(next);
 			}
+
+			if (keywords.find(token.value) != keywords.end())
+				token.type = keywords[token.value];
 
 			return std::make_unique<Token>(token);
 		}

@@ -16,6 +16,21 @@ enum class TokenType: int {
 	// Keywords
 	Fn,
 	Mut,
+
+	// Symbols
+	LeftCurly,
+	RightCurly,
+	LeftParen,
+	RightParen,
+	LeftBracket,
+	RightBracket,
+	Comma,
+	Colen,
+	Plus,
+	Minus,
+	Divide,
+	Multiply,
+	Equals,
 };
 
 struct Token {

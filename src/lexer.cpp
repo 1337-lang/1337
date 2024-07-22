@@ -12,6 +12,27 @@ Lexer::tokenize()
 {
 	Token token;
 
+	static std::unordered_map<std::string, TokenType> keywords = {
+		{ "fn", TokenType::Fn },
+		{ "mut", TokenType::Mut }
+	};
+
+	static std::unordered_map<char, TokenType> symbols = {
+		{ '{', TokenType::LeftCurly },
+		{ '}', TokenType::RightCurly },
+		{ '(', TokenType::LeftParen },
+		{ ')', TokenType::RightParen },
+		{ '[', TokenType::LeftBracket },
+		{ ']', TokenType::RightBracket },
+		{ ',', TokenType::Comma },
+		{ ':', TokenType::Colen },
+		{ '+', TokenType::Plus },
+		{ '-', TokenType::Minus },
+		{ '/', TokenType::Divide },
+		{ '*', TokenType::Multiply },
+		{ '=', TokenType::Equals },
+	};
+
 	while (this->cursor < this->content.length()) {
 		auto c = this->content[this->cursor];
 
@@ -41,11 +62,6 @@ Lexer::tokenize()
 
 		// Handle identifiers
 		if (std::isalpha(c)) {
-			static std::unordered_map<std::string, TokenType> keywords = {
-				{ "fn", TokenType::Fn },
-				{ "mut", TokenType::Mut }
-			};
-
 			token.type = TokenType::Identifier;
 			token.value = std::string(1, c);
 			while (++this->cursor < this->content.length()) {
@@ -60,6 +76,14 @@ Lexer::tokenize()
 			if (keywords.find(token.value) != keywords.end())
 				token.type = keywords[token.value];
 
+			return std::make_unique<Token>(token);
+		}
+
+		// Handle symbols
+		if (symbols.find(c) != symbols.end()) {
+			token.type = symbols[c];
+			token.value = std::string(1, c);
+			++this->cursor;
 			return std::make_unique<Token>(token);
 		}
 

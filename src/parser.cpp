@@ -93,6 +93,16 @@ Parser::parse_number()
 	return std::make_unique<NumberExprAst>(value);
 }
 
+std::unique_ptr<StringExprAst>
+Parser::parse_string()
+{
+	std::string value = this->token->value;
+	
+	this->advance();
+
+	return std::make_unique<StringExprAst>(value);
+}
+
 std::unique_ptr<ExprAst>
 Parser::parse_expression()
 {
@@ -105,6 +115,8 @@ Parser::parse_expression()
 	case TokenType::Integer:
 	case TokenType::Float:
 		return this->parse_number();
+	case TokenType::String:
+		return this->parse_string();
 	default:
 		break;
 	}

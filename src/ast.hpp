@@ -30,6 +30,22 @@ public:
 	}
 };
 
+class StringExprAst : public ExprAst {
+private:
+	std::string value;
+public:
+	inline StringExprAst(std::string value) {
+		this->value = value;
+	}
+
+	virtual inline std::string to_string() override {
+		std::stringstream ss;
+
+		ss << "StringExprAst { value: \"" << this->value << "\" }";
+		return ss.str();
+	}
+};
+
 class VariableExprAst : public ExprAst {
 private:
 	std::string name;

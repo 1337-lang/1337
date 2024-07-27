@@ -36,6 +36,9 @@ private:
 	std::unique_ptr<NumberExprAst>
 	parse_number();
 
+	std::unique_ptr<StringExprAst>
+	parse_string();
+
 	std::unique_ptr<DeclarationExprAst>
 	parse_declaration(std::string ident);
 

@@ -1,2 +1,4 @@
 thing := 10
 typed_thing : i32 = 1337
+pi := 3.1415926535
+text := "hello world!"

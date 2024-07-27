@@ -25,7 +25,7 @@ public:
 		this->number = number;
 	}
 
-	virtual inline std::string to_string()
+	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
 		ss << "NumberExprAst { number: " << this->number << " }";
@@ -42,7 +42,7 @@ public:
 		this->name = name;
 	}
 
-	virtual inline std::string to_string()
+	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
 		ss << "VariableExprAst { name: " << this->name << " }";
@@ -59,7 +59,7 @@ public:
 		this->type = type;
 	}
 
-	virtual inline std::string to_string()
+	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
 		ss << "BasicTypeExprAst { type: " << this->type << " }";
@@ -76,7 +76,7 @@ public:
 		this->type = std::move(type);
 	}
 
-	virtual inline std::string to_string()
+	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
 		ss << "TypeExprAst { type: " << this->type->to_string() << " }";
@@ -93,7 +93,7 @@ public:
 		this->args = std::move(args);
 	}
 
-	virtual inline std::string to_string()
+	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
 		ss << "FunctionProtoExprAst {}";
@@ -112,7 +112,7 @@ public:
 		this->body = std::move(body);
 	}
 
-	virtual inline std::string to_string()
+	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
 		ss << "FunctionExprAst {}";
@@ -135,7 +135,7 @@ public:
 		this->value = std::move(value);
 	}
 
-	virtual inline std::string to_string()
+	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
 		ss << "DeclarationExprAst { name: " << this->name->to_string() << ", explicit_type: " <<

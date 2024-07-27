@@ -52,13 +52,26 @@ Parser::parse_declaration(std::string ident)
 std::unique_ptr<TypeExprAst>
 Parser::parse_type()
 {
-	if (this->token->type == TokenType::Fn)
-		return std::make_unique<TypeExprAst>(this->parse_function_proto());
+	switch (this->token->type) {
+	case TokenType::Fn:
+	{
+		auto proto = this->parse_function_proto();
+		if (!proto)
+			return nullptr;
+		return std::make_unique<TypeExprAst>(std::move(proto));
+	}
 
-	auto basic_type = BasicTypeExprAst { this->token->value };
-	this->advance();
+	case TokenType::Identifier:
+	{
+		auto basic_type = BasicTypeExprAst { this->token->value };
+		this->advance();
+		return std::make_unique<TypeExprAst>(std::make_unique<BasicTypeExprAst>(basic_type));
+	}
+	default:
+		break;
+	}
 
-	return std::make_unique<TypeExprAst>(std::make_unique<BasicTypeExprAst>(basic_type));
+	return nullptr;
 }
 
 std::unique_ptr<ExprAst>
@@ -79,9 +92,9 @@ Parser::parse_identifier()
 	return nullptr;
 }
 
+// Token Patterns: [Fn] [Identifier] [LeftParen] ([Identifier] [Colon] [Type] [Comma])* [RightParen]
 // Token Patterns: [Fn] [LeftParen] ([Identifier] [Colon] [Type] [Comma])* [RightParen]
-// Token Patterns: [Fn] [LeftParen] ([Identifier] [Colon] [Type] [Comma])* [RightParen] [Identifier]
-// Example: fn (x: i32, y: i32) i32
+// Example: fn i32 (x: i32, y: i32)
 std::unique_ptr<FunctionProtoExprAst>
 Parser::parse_function_proto()
 {
@@ -91,7 +104,14 @@ Parser::parse_function_proto()
 	if (!this->advance())
 		return nullptr;
 
-	if (this->token->type != TokenType::LeftParen)
+	// Parse return type if it exists
+	if (this->token->type != TokenType::LeftParen) {
+		return_type = this->parse_type();
+		if (!return_type)
+			return nullptr;
+	}
+
+	if (!this->token || this->token->type != TokenType::LeftParen)
 		return nullptr;
 
 	if (!this->advance())
@@ -105,6 +125,8 @@ Parser::parse_function_proto()
 		if (!param)
 			return nullptr;
 
+		params.push_back(std::move(param));
+
 		if (!this->token)
 			return nullptr;
 
@@ -114,19 +136,27 @@ Parser::parse_function_proto()
 		}
 	}
 
-	if (this->advance() && this->token->type == TokenType::Identifier) {
-		return_type = this->parse_type();
-		if (!return_type)
-			return nullptr;
-	}
+	this->advance();
 
 	return std::make_unique<FunctionProtoExprAst>(std::move(params), std::move(return_type));
 }
 
+// Token Patterns: [Ident] [Colon] [Type]
 std::unique_ptr<FunctionParamAst>
 Parser::parse_function_param()
 {
-	return nullptr;
+	std::unique_ptr<VariableExprAst> var = std::make_unique<VariableExprAst>(this->token->value);
+	if (!this->advance() || this->token->type != TokenType::Colon)
+		return nullptr;
+
+	if (!this->advance())
+		return nullptr;
+
+	auto type = this->parse_type();
+	if (!type)
+		return nullptr;
+
+	return std::make_unique<FunctionParamAst>(std::move(var), std::move(type));
 }
 
 std::unique_ptr<NumberExprAst>

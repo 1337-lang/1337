@@ -5,13 +5,14 @@ text := "hello world!"
 no_value : i64
 
 basic_proto : fn ()
-advanced_proto : fn (a: i32, b: i32)
+args_proto : fn (a: i32, b: i32)
+advanced_proto : fn i64 (a: i32, b: i32)
 
 basic := fn () {
 	
 }
 
-sum := fn (x: i32, y: i32) i32 {
+sum := fn i64 (x: i32, y: i32) {
 	x + y
 }
 

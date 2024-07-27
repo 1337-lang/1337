@@ -112,7 +112,7 @@ public:
 		std::stringstream ss;
 
 		ss << "FunctionParamAst { var: " << this->var->to_string() <<
-			", type" << this->type->to_string() << " }";
+			", type: " << this->type->to_string() << " }";
 
 		return ss.str();
 	}
@@ -137,7 +137,8 @@ public:
 		for (auto &param : this->params) {
 			ss << param->to_string() << " " << std::endl;
 		}
-		ss << "] }";
+		ss << "], return_type: " <<
+			(this->return_type ? this->return_type->to_string() : "None") << " }";
 
 		return ss.str();
 	}

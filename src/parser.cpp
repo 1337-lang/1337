@@ -39,9 +39,9 @@ Parser::parse_declaration(std::string ident)
 		return nullptr;
 	}
 
-	decl_ast = std::make_unique<DeclarationExprAst>(DeclarationExprAst(
+	decl_ast = std::make_unique<DeclarationExprAst>(
 		std::move(var_ast), std::move(explicit_type), std::move(value)
-	));
+	);
 
 	return decl_ast;
 }
@@ -56,7 +56,7 @@ Parser::parse_type()
 	auto basic_type = BasicTypeExprAst { this->token->value };
 	this->advance();
 
-	return std::make_unique<TypeExprAst>(TypeExprAst(std::make_unique<BasicTypeExprAst>(basic_type)));
+	return std::make_unique<TypeExprAst>(std::make_unique<BasicTypeExprAst>(basic_type));
 }
 
 std::unique_ptr<ExprAst>

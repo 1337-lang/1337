@@ -96,6 +96,22 @@ public:
 	}
 };
 
+class ArrayTypeExprAst : public ExprAst {
+private:
+	std::unique_ptr<TypeExprAst> recursing_type;
+public:
+	inline ArrayTypeExprAst(std::unique_ptr<TypeExprAst> recursing_type)
+		: recursing_type(std::move(recursing_type))
+	{}
+
+	virtual inline std::string to_string() override
+	{
+		std::stringstream ss;
+		ss << "ArrayTypeExprAst { recursing_type: " << this->recursing_type->to_string() << " }";
+		return ss.str();
+	}
+};
+
 class FunctionParamAst {
 private:
 	std::unique_ptr<VariableExprAst> var;

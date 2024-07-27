@@ -60,12 +60,26 @@ Parser::parse_type()
 			return nullptr;
 		return std::make_unique<TypeExprAst>(std::move(proto));
 	}
-
 	case TokenType::Identifier:
 	{
 		auto basic_type = BasicTypeExprAst { this->token->value };
 		this->advance();
 		return std::make_unique<TypeExprAst>(std::make_unique<BasicTypeExprAst>(basic_type));
+	}
+	case TokenType::LeftBracket:
+	{
+		this->advance();
+		if (!this->token || this->token->type != TokenType::RightBracket)
+			return nullptr;
+
+		if (!this->advance())
+			return nullptr;
+
+		auto recursing_type = this->parse_type();
+		if (!recursing_type)
+			return nullptr;
+
+		return std::make_unique<TypeExprAst>(std::make_unique<ArrayTypeExprAst>(std::move(recursing_type)));
 	}
 	default:
 		break;

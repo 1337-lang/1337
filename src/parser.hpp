@@ -44,6 +44,12 @@ private:
 
 	std::unique_ptr<TypeExprAst>
 	parse_type();
+
+	std::unique_ptr<FunctionProtoExprAst>
+	parse_function_proto();
+
+	std::unique_ptr<FunctionParamAst>
+	parse_function_param();
 };
 
 #endif

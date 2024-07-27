@@ -2,7 +2,6 @@
 #define _AST_HPP_
 
 #include <string>
-#include <utility>
 #include <vector>
 #include <memory>
 #include <sstream>
@@ -97,19 +96,49 @@ public:
 	}
 };
 
+class FunctionParamAst {
+private:
+	std::unique_ptr<VariableExprAst> var;
+	std::unique_ptr<ExprAst> type;
+public:
+	inline FunctionParamAst(std::unique_ptr<VariableExprAst> var, std::unique_ptr<TypeExprAst> type)
+	{
+		this->var = std::move(var);
+		this->type = std::move(type);
+	}
+
+	inline std::string to_string()
+	{
+		std::stringstream ss;
+
+		ss << "FunctionParamAst { var: " << this->var->to_string() <<
+			", type" << this->type->to_string() << " }";
+
+		return ss.str();
+	}
+};
+
 class FunctionProtoExprAst : public ExprAst {
 private:
-	std::vector<std::pair<VariableExprAst, TypeExprAst>> args;
+	std::vector<std::unique_ptr<FunctionParamAst>> params;
+	std::unique_ptr<TypeExprAst> return_type; // `nullptr` means no return
 public:
-	inline FunctionProtoExprAst(std::vector<std::pair<VariableExprAst, TypeExprAst>> args)
+	inline FunctionProtoExprAst(std::vector<std::unique_ptr<FunctionParamAst>> args,
+	                            std::unique_ptr<TypeExprAst> return_type)
 	{
-		this->args = std::move(args);
+		this->params = std::move(args);
+		this->return_type = std::move(return_type);
 	}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "FunctionProtoExprAst {}";
+		ss << "FunctionProtoExprAst { params: [";
+		for (auto &param : this->params) {
+			ss << param->to_string() << " " << std::endl;
+		}
+		ss << "] }";
+
 		return ss.str();
 	}
 };

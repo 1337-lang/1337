@@ -2,3 +2,19 @@ thing := 10
 typed_thing : i32 = 1337
 pi := 3.1415926535
 text := "hello world!"
+no_value : i64
+
+basic_proto : fn ()
+advanced_proto : fn (a: i32, b: i32)
+
+basic := fn () {
+	
+}
+
+sum := fn (x: i32, y: i32) i32 {
+	x + y
+}
+
+main := fn (argc: i32, argv: []str) {
+	number := 10
+}

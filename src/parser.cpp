@@ -56,7 +56,7 @@ Parser::parse_type()
 	auto basic_type = BasicTypeExprAst { this->token->value };
 	this->advance();
 
-	return std::make_unique<TypeExprAst>(TypeExprAst(std::make_unique<ExprAst>(basic_type)));
+	return std::make_unique<TypeExprAst>(TypeExprAst(std::make_unique<BasicTypeExprAst>(basic_type)));
 }
 
 std::unique_ptr<ExprAst>

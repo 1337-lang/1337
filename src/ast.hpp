@@ -9,10 +9,7 @@
 
 class ExprAst {
 public:
-	virtual inline std::string to_string()
-	{
-		return "ExprAst{}";
-	}
+	virtual inline std::string to_string() = 0;
 };
 
 class NumberExprAst : public ExprAst {

@@ -10,7 +10,9 @@ private:
 	Lexer lexer;
 	std::unique_ptr<Token> token = nullptr;
 public:
-	Parser(std::string_view content);
+	inline Parser(std::string_view content): lexer(content) {
+		this->advance();
+	}
 public:
 	std::unique_ptr<ExprAst>
 	parse_expression();
@@ -27,6 +29,18 @@ public:
 	{
 		return this->token && this->token->type == TokenType::Eof;
 	}
+private:
+	std::unique_ptr<ExprAst>
+	parse_identifier();
+
+	std::unique_ptr<NumberExprAst>
+	parse_number();
+
+	std::unique_ptr<DeclarationExprAst>
+	parse_declaration(std::string ident);
+
+	std::unique_ptr<TypeExprAst>
+	parse_type();
 };
 
 #endif

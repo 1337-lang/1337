@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "lexer.hpp"
+#include "parser.hpp"
 
 int main(int argc, char **argv)
 {
@@ -21,6 +21,7 @@ int main(int argc, char **argv)
 	ss << source.rdbuf();
 	auto content = ss.str();
 
+	/*
 	auto lexer = Lexer(content);
 	std::unique_ptr<Token> token;
 	while (true) {
@@ -36,6 +37,21 @@ int main(int argc, char **argv)
 			std::cout << "File ended" << std::endl;
 			break;
 		}
+	}
+	*/
+
+	auto parser = Parser(content);
+
+	while (true) {
+		auto expr = parser.parse_expression();
+		if (!expr)
+			break;
+
+		std::cout << "EXPR: " << expr->to_string() << std::endl;
+	}
+
+	if (!parser.is_finished()) {
+		std::cout << "Failed to parse until EOF" << std::endl;
 	}
 
 	return 0;

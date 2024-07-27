@@ -25,7 +25,7 @@ Lexer::tokenize()
 		{ '[', TokenType::LeftBracket },
 		{ ']', TokenType::RightBracket },
 		{ ',', TokenType::Comma },
-		{ ':', TokenType::Colen },
+		{ ':', TokenType::Colon },
 		{ '+', TokenType::Plus },
 		{ '-', TokenType::Minus },
 		{ '/', TokenType::Divide },

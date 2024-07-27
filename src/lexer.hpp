@@ -28,7 +28,7 @@ enum class TokenType: int {
 	LeftBracket,
 	RightBracket,
 	Comma,
-	Colen,
+	Colon,
 	Plus,
 	Minus,
 	Divide,

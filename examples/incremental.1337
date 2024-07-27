@@ -1,1 +1,2 @@
 thing := 10
+typed_thing : i32 = 1337

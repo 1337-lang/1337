@@ -20,20 +20,28 @@ Parser::parse_declaration(std::string ident)
 		explicit_type = this->parse_type();
 		if (!explicit_type)
 			return decl_ast;
+		if (this->token->type == TokenType::Equals) {
+			if (!this->advance())
+				return nullptr;
+			value = this->parse_expression();
+			if (!value)
+				return nullptr;
+		}
 		break;
 	case TokenType::Equals:
 		if (!this->advance())
-			return decl_ast;
+			return nullptr;
 		value = this->parse_expression();
 		if (!value)
-			return decl_ast;
-		decl_ast = std::make_unique<DeclarationExprAst>(DeclarationExprAst(
-			std::move(var_ast), std::move(explicit_type), std::move(value)
-		));
+			return nullptr;
 		break;
 	default:
-		break;
+		return nullptr;
 	}
+
+	decl_ast = std::make_unique<DeclarationExprAst>(DeclarationExprAst(
+		std::move(var_ast), std::move(explicit_type), std::move(value)
+	));
 
 	return decl_ast;
 }
@@ -46,25 +54,27 @@ Parser::parse_type()
 	// TODO: parse function types
 
 	auto basic_type = BasicTypeExprAst { this->token->value };
+	this->advance();
+
 	return std::make_unique<TypeExprAst>(TypeExprAst(std::make_unique<ExprAst>(basic_type)));
 }
 
 std::unique_ptr<ExprAst>
 Parser::parse_identifier()
 {
-	std::unique_ptr<ExprAst> ast = nullptr;
 	std::string ident = this->token->value;
 
 	if (!this->advance())
-		return ast;
+		return nullptr;
 
 	switch (this->token->type) {
 	case TokenType::Colon:
-	default:
 		return this->parse_declaration(ident);
+	default:
+		break;
 	}
 
-	return ast;
+	return nullptr;
 }
 
 std::unique_ptr<NumberExprAst>
@@ -73,7 +83,7 @@ Parser::parse_number()
 	double value;
 
 	try {
-		 value = stod(this->token->value);
+		value = stod(this->token->value);
 	} catch (...) {
 		return nullptr;
 	}

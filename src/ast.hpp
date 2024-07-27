@@ -207,4 +207,25 @@ public:
 	}
 };
 
+class BinaryExprAst : public ExprAst {
+private:
+	std::unique_ptr<ExprAst> left;
+	std::string op;
+	std::unique_ptr<ExprAst> right;
+public:
+	inline BinaryExprAst(std::unique_ptr<ExprAst> left, std::string op, std::unique_ptr<ExprAst> right)
+		: left(std::move(left)), op(op), right(std::move(right))
+	{}
+
+	virtual inline std::string to_string() override {
+		std::stringstream ss;
+
+		ss << "BinaryOpExprAst { left: " << this->left->to_string() <<
+			", op: " << this->op <<
+			", right: " << this->right->to_string();
+
+		return ss.str();
+	}
+};
+
 #endif

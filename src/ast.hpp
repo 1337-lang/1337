@@ -54,7 +54,7 @@ private:
 public:
 	inline FunctionProtoExprAst(std::vector<std::pair<VariableExprAst, TypeExprAst>> args)
 	{
-		this->args = args;
+		this->args = std::move(args);
 	}
 };
 

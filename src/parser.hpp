@@ -12,11 +12,8 @@ private:
 public:
 	Parser(std::string_view content);
 public:
-	std::unique_ptr<Expr>
+	std::unique_ptr<ExprAst>
 	parse_expression();
-
-	std::unique_ptr<Stmt>
-	parse_statement();
 
 	void
 	advance();

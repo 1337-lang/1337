@@ -133,5 +133,11 @@ Lexer::tokenize()
 		return std::make_unique<Token>(token);
 	}
 
+	if (this->cursor == this->content.length()) {
+		token.type = TokenType::Eof;
+		token.value = "EOF";
+		return std::make_unique<Token>(token);
+	}
+
 	return nullptr;
 }

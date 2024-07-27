@@ -15,8 +15,18 @@ public:
 	std::unique_ptr<ExprAst>
 	parse_expression();
 
-	void
-	advance();
+	inline std::unique_ptr<Token> &
+	advance()
+	{
+		this->token = this->lexer.tokenize();
+		return this->token;
+	}
+
+	inline bool
+	is_finished()
+	{
+		return this->token && this->token->type == TokenType::Eof;
+	}
 };
 
 #endif

@@ -23,8 +23,19 @@ int main(int argc, char **argv)
 
 	auto lexer = Lexer(content);
 	std::unique_ptr<Token> token;
-	while ((token = lexer.tokenize()) != nullptr) {
+	while (true) {
+		token = lexer.tokenize();
+		if (!token) {
+			std::cout << "Failed to tokenize" << std::endl;
+			return -1;
+		}
+
 		std::cout << "TOKEN: " << static_cast<int>(token->type) << ", " << token->value << std::endl;
+
+		if (token->type == TokenType::Eof) {
+			std::cout << "File ended" << std::endl;
+			break;
+		}
 	}
 
 	return 0;

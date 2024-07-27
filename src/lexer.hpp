@@ -6,6 +6,7 @@
 #include <memory>
 
 enum class TokenType: int {
+	Eof = -1,
 	Unknown,
 	Identifier,
 

@@ -89,7 +89,7 @@ Parser::parse_identifier()
 		break;
 	}
 
-	return nullptr;
+	return std::make_unique<VariableExprAst>(ident);
 }
 
 // Token Patterns: [Fn] [Identifier] [LeftParen] ([Identifier] [Colon] [Type] [Comma])* [RightParen]
@@ -159,6 +159,27 @@ Parser::parse_function_param()
 	return std::make_unique<FunctionParamAst>(std::move(var), std::move(type));
 }
 
+// Token Patterns: [LeftCurly] <Expr>* [RightCurly]
+std::unique_ptr<CodeblockExprAst>
+Parser::parse_codeblock()
+{
+	std::vector<std::unique_ptr<ExprAst>> subexprs;
+
+	if (!this->advance())
+		return nullptr;
+
+	while (this->token->type != TokenType::RightCurly) {
+		auto expr = this->parse_expression();
+		if (!expr || !this->token)
+			return nullptr;
+		subexprs.push_back(std::move(expr));
+	}
+
+	this->advance();
+
+	return std::make_unique<CodeblockExprAst>(std::move(subexprs));
+}
+
 std::unique_ptr<NumberExprAst>
 Parser::parse_number()
 {
@@ -208,12 +229,14 @@ Parser::parse_expression()
 		if (!this->token || this->token->type != TokenType::LeftCurly)
 			return proto;
 
-		auto body = this->parse_expression();
+		auto body = this->parse_codeblock();
 		if (!body)
 			return nullptr;
 
 		return std::make_unique<FunctionExprAst>(std::move(proto), std::move(body));
 	}
+	case TokenType::LeftCurly:
+		return this->parse_codeblock();
 	default:
 		break;
 	}

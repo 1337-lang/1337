@@ -50,6 +50,9 @@ private:
 
 	std::unique_ptr<FunctionParamAst>
 	parse_function_param();
+
+	std::unique_ptr<CodeblockExprAst>
+	parse_codeblock();
 };
 
 #endif

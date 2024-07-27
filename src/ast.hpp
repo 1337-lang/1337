@@ -135,7 +135,7 @@ public:
 		std::stringstream ss;
 		ss << "FunctionProtoExprAst { params: [";
 		for (auto &param : this->params) {
-			ss << param->to_string() << " " << std::endl;
+			ss << param->to_string() << " ";
 		}
 		ss << "], return_type: " <<
 			(this->return_type ? this->return_type->to_string() : "None") << " }";
@@ -144,21 +144,40 @@ public:
 	}
 };
 
+class CodeblockExprAst : public ExprAst {
+private:
+	std::vector<std::unique_ptr<ExprAst>> subexprs;
+public:
+	inline CodeblockExprAst(std::vector<std::unique_ptr<ExprAst>> subexprs)
+		: subexprs(std::move(subexprs))
+	{}
+
+	virtual inline std::string to_string() override {
+		std::stringstream ss;
+		ss << "CodeblockExprAst { subexprs: [";
+		for (auto &expr : this->subexprs) {
+			ss << expr->to_string() << " ";
+		}
+		ss << "] }";
+
+		return ss.str();
+	}
+};
+
 class FunctionExprAst : public ExprAst {
 private:
 	std::unique_ptr<FunctionProtoExprAst> proto;
-	std::unique_ptr<ExprAst> body;
+	std::unique_ptr<CodeblockExprAst> body;
 public:
-	inline FunctionExprAst(std::unique_ptr<FunctionProtoExprAst> proto, std::unique_ptr<ExprAst> body)
-	{
-		this->proto = std::move(proto);
-		this->body = std::move(body);
-	}
+	inline FunctionExprAst(std::unique_ptr<FunctionProtoExprAst> proto, std::unique_ptr<CodeblockExprAst> body)
+		: proto(std::move(proto)), body(std::move(body))
+	{}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "FunctionExprAst {}";
+		ss << "FunctionExprAst { proto: " << this->proto->to_string() <<
+			", body: " << this->body->to_string() << " }";
 		return ss.str();
 	}
 };

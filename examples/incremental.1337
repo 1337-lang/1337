@@ -12,8 +12,13 @@ basic := fn () {
 	
 }
 
+basic_two := fn (x: i32) {
+	abc := x
+}
+
 sum := fn i64 (x: i32, y: i32) {
-	x + y
+	result := x + y
+	result
 }
 
 main := fn (argc: i32, argv: []str) {

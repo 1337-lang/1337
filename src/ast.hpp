@@ -8,7 +8,7 @@
 
 class ExprAst {
 public:
-	virtual inline std::string to_string() = 0;
+	virtual std::string to_string() = 0;
 };
 
 class NumberExprAst : public ExprAst {
@@ -207,13 +207,13 @@ public:
 	}
 };
 
-class BinaryExprAst : public ExprAst {
-private:
+class BinaryOpExprAst : public ExprAst {
+public:
 	std::unique_ptr<ExprAst> left;
 	std::string op;
 	std::unique_ptr<ExprAst> right;
 public:
-	inline BinaryExprAst(std::unique_ptr<ExprAst> left, std::string op, std::unique_ptr<ExprAst> right)
+	inline BinaryOpExprAst(std::unique_ptr<ExprAst> left, std::string op, std::unique_ptr<ExprAst> right)
 		: left(std::move(left)), op(op), right(std::move(right))
 	{}
 
@@ -222,10 +222,12 @@ public:
 
 		ss << "BinaryOpExprAst { left: " << this->left->to_string() <<
 			", op: " << this->op <<
-			", right: " << this->right->to_string();
+			", right: " << this->right->to_string() << " }";
 
 		return ss.str();
 	}
+public:
+	static int get_precedence(std::string op);
 };
 
 #endif

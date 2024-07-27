@@ -180,6 +180,37 @@ Parser::parse_codeblock()
 	return std::make_unique<CodeblockExprAst>(std::move(subexprs));
 }
 
+std::unique_ptr<BinaryOpExprAst>
+Parser::parse_binop(std::unique_ptr<ExprAst> left, std::string op)
+{
+	int prec = BinaryOpExprAst::get_precedence(op);
+	auto right = this->parse_expression();
+	BinaryOpExprAst *next_binop;
+
+	if (!right)
+		return nullptr;
+
+	// Next expression is not a binop, just return the LHS and RHS as expected
+	if ((next_binop = dynamic_cast<BinaryOpExprAst *>(right.get())) == nullptr) {
+		return std::make_unique<BinaryOpExprAst>(std::move(left), op, std::move(right));
+	}
+
+	// If the precedence of the next binop is greater than the current,
+	// we have to swap its right hand side with our left hand side, and also
+	// swap the operators
+	auto next_op = next_binop->op;
+	int next_prec = BinaryOpExprAst::get_precedence(next_op);
+	if (next_prec < prec) {
+		auto next_right = std::move(next_binop->right);
+		next_binop->right = std::move(left);
+		next_binop->op = op;
+		left = std::move(next_right);
+		op = next_op;
+	}
+
+	return std::make_unique<BinaryOpExprAst>(std::move(left), op, std::move(right));
+}
+
 std::unique_ptr<NumberExprAst>
 Parser::parse_number()
 {
@@ -209,17 +240,22 @@ Parser::parse_string()
 std::unique_ptr<ExprAst>
 Parser::parse_expression()
 {
+	std::unique_ptr<ExprAst> expr = nullptr;
+
 	if (!this->token || this->token->type == TokenType::Eof)
 		return nullptr;
 
 	switch (this->token->type) {
 	case TokenType::Identifier:
-		return this->parse_identifier();
+		expr = this->parse_identifier();
+		break;
 	case TokenType::Integer:
 	case TokenType::Float:
-		return this->parse_number();
+		expr = this->parse_number();
+		break;
 	case TokenType::String:
-		return this->parse_string();
+		expr = this->parse_string();
+		break;
 	case TokenType::Fn:
 	{
 		auto proto = this->parse_function_proto();
@@ -233,13 +269,26 @@ Parser::parse_expression()
 		if (!body)
 			return nullptr;
 
-		return std::make_unique<FunctionExprAst>(std::move(proto), std::move(body));
+		expr = std::make_unique<FunctionExprAst>(std::move(proto), std::move(body));
+		break;
 	}
 	case TokenType::LeftCurly:
-		return this->parse_codeblock();
+		expr = this->parse_codeblock();
+		break;
 	default:
 		break;
 	}
 
-	return nullptr;
+	if (!expr)
+		return nullptr;
+
+	// Check if the following token is a binary operator
+	if (this->token && BinaryOpExprAst::get_precedence(this->token->value) >= 0) {
+		auto op = this->token->value;
+		this->advance();
+		auto binop = this->parse_binop(std::move(expr), op);
+		expr = std::move(binop);
+	}
+
+	return expr;
 }

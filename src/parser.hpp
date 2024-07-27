@@ -53,6 +53,9 @@ private:
 
 	std::unique_ptr<CodeblockExprAst>
 	parse_codeblock();
+
+	std::unique_ptr<BinaryOpExprAst>
+	parse_binop(std::unique_ptr<ExprAst> left, std::string op);
 };
 
 #endif

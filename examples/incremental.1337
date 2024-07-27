@@ -16,6 +16,10 @@ basic_two := fn (x: i32) {
 	abc := x
 }
 
+binop := 1 + 2
+binop2 := 2 * 3 + 1
+complicated_binop := 1 * 2 + 3 * 4
+
 sum := fn i64 (x: i32, y: i32) {
 	result := x + y
 	result

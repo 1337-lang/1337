@@ -17,6 +17,9 @@ public:
 	std::unique_ptr<ExprAst>
 	parse_expression();
 
+	std::unique_ptr<ExprAst>
+	parse_primary();
+
 	inline std::unique_ptr<Token> &
 	advance()
 	{
@@ -54,8 +57,8 @@ private:
 	std::unique_ptr<CodeblockExprAst>
 	parse_codeblock();
 
-	std::unique_ptr<BinaryOpExprAst>
-	parse_binop(std::unique_ptr<ExprAst> left, std::string op);
+	std::unique_ptr<ExprAst>
+	parse_binop_rhs(int expr_prec, std::unique_ptr<ExprAst> lhs);
 };
 
 #endif

@@ -4,10 +4,10 @@
 int BinaryOpExprAst::get_precedence(std::string op)
 {
 	static std::unordered_map<std::string, int> precedence {
-		{ "+", 0 },
-		{ "-", 0 },
-		{ "*", 1 },
-		{ "/", 1 },
+		{ "+", 20 },
+		{ "-", 20 },
+		{ "*", 40 },
+		{ "/", 40 },
 	};
 
 	if (precedence.find(op) == precedence.end())

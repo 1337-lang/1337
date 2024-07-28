@@ -194,35 +194,33 @@ Parser::parse_codeblock()
 	return std::make_unique<CodeblockExprAst>(std::move(subexprs));
 }
 
-std::unique_ptr<BinaryOpExprAst>
-Parser::parse_binop(std::unique_ptr<ExprAst> left, std::string op)
+std::unique_ptr<ExprAst>
+Parser::parse_binop_rhs(int expr_prec, std::unique_ptr<ExprAst> lhs)
 {
-	int prec = BinaryOpExprAst::get_precedence(op);
-	auto right = this->parse_expression();
-	BinaryOpExprAst *next_binop;
+	while (true) {
+		if (BinaryOpExprAst::get_precedence(this->token->value) < expr_prec)
+			return lhs;
 
-	if (!right)
-		return nullptr;
+		auto op = this->token->value;
+		auto token_prec = BinaryOpExprAst::get_precedence(op);
+		if (!this->advance())
+			return nullptr;
 
-	// Next expression is not a binop, just return the LHS and RHS as expected
-	if ((next_binop = dynamic_cast<BinaryOpExprAst *>(right.get())) == nullptr) {
-		return std::make_unique<BinaryOpExprAst>(std::move(left), op, std::move(right));
+		auto rhs = this->parse_primary();
+		if (!rhs)
+			return nullptr;
+
+		// If next operator precedence is bigger than the current operator precedence,
+		// we parse a binop having the left hand side set to our right hand side
+		if (this->token && BinaryOpExprAst::get_precedence(this->token->value) > token_prec) {
+			// We pass 'token_prec + 1' to avoid swaping contents with the same precedence
+			rhs = this->parse_binop_rhs(token_prec + 1, std::move(rhs));
+			if (!rhs)
+				return nullptr;
+		}
+
+		lhs = std::make_unique<BinaryOpExprAst>(std::move(lhs), op, std::move(rhs));
 	}
-
-	// If the precedence of the next binop is greater than the current,
-	// we have to swap its right hand side with our left hand side, and also
-	// swap the operators
-	auto next_op = next_binop->op;
-	int next_prec = BinaryOpExprAst::get_precedence(next_op);
-	if (next_prec < prec) {
-		auto next_right = std::move(next_binop->right);
-		next_binop->right = std::move(left);
-		next_binop->op = op;
-		left = std::move(next_right);
-		op = next_op;
-	}
-
-	return std::make_unique<BinaryOpExprAst>(std::move(left), op, std::move(right));
 }
 
 std::unique_ptr<NumberExprAst>
@@ -253,6 +251,19 @@ Parser::parse_string()
 
 std::unique_ptr<ExprAst>
 Parser::parse_expression()
+{
+	auto lhs = this->parse_primary();
+	if (!lhs || !this->token)
+		return lhs;
+
+	// If the is a next token, attempt to parse this as a BinOp
+	// The BinOp parse function will just return the LHS if it's
+	// not a BinOp
+	return this->parse_binop_rhs(0, std::move(lhs));
+}
+
+std::unique_ptr<ExprAst>
+Parser::parse_primary()
 {
 	std::unique_ptr<ExprAst> expr = nullptr;
 
@@ -291,17 +302,6 @@ Parser::parse_expression()
 		break;
 	default:
 		break;
-	}
-
-	if (!expr)
-		return nullptr;
-
-	// Check if the following token is a binary operator
-	if (this->token && BinaryOpExprAst::get_precedence(this->token->value) >= 0) {
-		auto op = this->token->value;
-		this->advance();
-		auto binop = this->parse_binop(std::move(expr), op);
-		expr = std::move(binop);
 	}
 
 	return expr;

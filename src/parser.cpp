@@ -197,6 +197,21 @@ Parser::parse_codeblock()
 std::unique_ptr<ExprAst>
 Parser::parse_binop_rhs(int expr_prec, std::unique_ptr<ExprAst> lhs)
 {
+	/*
+	 * Let's say it takes the input `1 + 2 / 3 * 4 - 5`
+	 * - It gets `1` and the precedence of the operator `+`
+	 * - It parses the primary expression for the RHS, which is gonna be `2`
+	 * - It compares the precedence of the next operator `/`, which is greater than the precedence of `+`
+	 * - It's gonna attempt to parse the expression `2 / 3 * 4 - 5` now
+	 * - The LHS is `2`, and the operator is `/`
+	 * - The RHS is `3`
+	 * - It gets the operator `*`, which has the same precedence as the current operator
+	 * - It will create the first BinOp expression, with `{ left: 2, op: '/', right: 3 }`
+	 * - It's gonna create the second BinOp expression, with `{ left: { left: 2, op: '/', right: 3 }, op: '*', right: 4 }`
+	 * - The next operator is `-`, so the precedence is smaller. So we return the BinOp to the previous call
+	 * - In the previous call, the following BinOp expression will be created: `{ left: 1, op: '+', right: { <newly returned RHS> }`
+	 * - Finally, it's gonna build the following expression on the next loop: `{ left: <everything until now>, op: '-', right: 5 }`
+	 */
 	while (true) {
 		if (BinaryOpExprAst::get_precedence(this->token->value) < expr_prec)
 			return lhs;

@@ -5,10 +5,15 @@
 #include <vector>
 #include <memory>
 #include <sstream>
+#include "llvm.hpp"
 
 class ExprAst {
 public:
 	virtual std::string to_string() = 0;
+	virtual llvm::Value *codegen()
+	{
+		return nullptr;
+	}
 };
 
 class NumberExprAst : public ExprAst {

@@ -88,6 +88,31 @@ Parser::parse_type()
 	return nullptr;
 }
 
+std::unique_ptr<CallExprAst>
+Parser::parse_call(std::string ident)
+{
+	std::vector<std::unique_ptr<ExprAst>> args;
+	while (true) {
+		if (!this->advance())
+			return nullptr;
+
+		if (this->token->type == TokenType::RightParen)
+			break;
+		else if (this->token->type == TokenType::Comma)
+			continue;
+
+		auto arg = this->parse_expression();
+		if (!arg)
+			return nullptr;
+
+		args.push_back(std::move(arg));
+	};
+
+	this->advance(); // Skip over right parenthesis
+
+	return std::make_unique<CallExprAst>(ident, std::move(args));
+}
+
 std::unique_ptr<ExprAst>
 Parser::parse_identifier()
 {
@@ -99,6 +124,8 @@ Parser::parse_identifier()
 	switch (this->token->type) {
 	case TokenType::Colon:
 		return this->parse_declaration(ident);
+	case TokenType::LeftParen:
+		return this->parse_call(ident);
 	default:
 		break;
 	}

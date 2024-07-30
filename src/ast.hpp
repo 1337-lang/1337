@@ -251,4 +251,26 @@ public:
 	static int get_precedence(std::string op);
 };
 
+class CallExprAst : public ExprAst {
+private:
+	std::string function;
+	std::vector<std::unique_ptr<ExprAst>> args;
+public:
+	inline CallExprAst(std::string function, std::vector<std::unique_ptr<ExprAst>> args)
+		: function(function), args(std::move(args))
+	{}
+
+	virtual inline std::string to_string() override {
+		std::stringstream ss;
+
+		ss << "CallExprAst { function: " << this->function << ", args: [";
+		for (auto &arg : this->args) {
+			ss << arg->to_string();
+		}
+		ss << "] }";
+
+		return ss.str();
+	}
+};
+
 #endif

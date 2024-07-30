@@ -45,6 +45,9 @@ private:
 	std::unique_ptr<DeclarationExprAst>
 	parse_declaration(std::string ident);
 
+	std::unique_ptr<CallExprAst>
+	parse_call(std::string ident);
+
 	std::unique_ptr<TypeExprAst>
 	parse_type();
 

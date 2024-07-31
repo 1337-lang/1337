@@ -78,10 +78,10 @@ private:
 
 		auto c = this->content[this->cursor];
 		if (c == '\n') {
-			this->loc.line += 1;
-			this->loc.column = 1;
+			++this->loc.line;
+			this->loc.column = 0;
 		} else if (c != '\r') {
-			this->loc.column += 1;
+			++this->loc.column;
 		}
 
 		return this->cursor;

@@ -46,10 +46,10 @@ private:
 	parse_string();
 
 	std::unique_ptr<DeclarationExprAst>
-	parse_declaration(std::string ident);
+	parse_declaration(SourceLocation loc, std::string ident);
 
 	std::unique_ptr<CallExprAst>
-	parse_call(std::string ident);
+	parse_call(SourceLocation loc, std::string ident);
 
 	std::unique_ptr<TypeExprAst>
 	parse_type();

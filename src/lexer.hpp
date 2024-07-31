@@ -9,6 +9,7 @@ struct SourceLocation {
 	std::string filepath = "<memory>";
 	size_t line = 0;
 	size_t column = 0;
+	size_t cursor = 0;
 
 	inline std::string str()
 	{
@@ -73,6 +74,8 @@ private:
 	advance()
 	{
 		++this->cursor;
+		this->loc.cursor = this->cursor;
+
 		if (this->cursor >= this->content.length())
 			return this->cursor;
 

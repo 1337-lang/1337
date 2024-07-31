@@ -12,6 +12,10 @@ class ExprAst {
 protected:
 	SourceLocation loc;
 public:
+	inline ExprAst(SourceLocation loc)
+		: loc(loc)
+	{}
+public:
 	virtual std::string to_string() = 0;
 	virtual llvm::Value *codegen()
 	{
@@ -28,11 +32,9 @@ private:
 	// For now, all numbers will be double
 	double number;
 public:
-	inline NumberExprAst(double number, SourceLocation loc)
-	{
-		this->number = number;
-		this->loc = loc;
-	}
+	inline NumberExprAst(SourceLocation loc, double number)
+		: ExprAst(loc), number(number)
+	{}
 
 	virtual inline std::string to_string() override
 	{
@@ -46,14 +48,14 @@ class StringExprAst : public ExprAst {
 private:
 	std::string value;
 public:
-	inline StringExprAst(std::string value) {
-		this->value = value;
-	}
+	inline StringExprAst(SourceLocation loc, std::string value)
+		: ExprAst(loc), value(value)
+	{}
 
 	virtual inline std::string to_string() override {
 		std::stringstream ss;
 
-		ss << "StringExprAst { value: \"" << this->value << "\" }";
+		ss << "StringExprAst (" << this->loc.str()  << ") { value: \"" << this->value << "\" }";
 		return ss.str();
 	}
 };
@@ -62,15 +64,14 @@ class VariableExprAst : public ExprAst {
 private:
 	std::string name;
 public:
-	inline VariableExprAst(std::string name)
-	{
-		this->name = name;
-	}
+	inline VariableExprAst(SourceLocation loc, std::string name)
+		: ExprAst(loc), name(name)
+	{}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "VariableExprAst { name: " << this->name << " }";
+		ss << "VariableExprAst (" << this->loc.str() << ") { name: " << this->name << " }";
 		return ss.str();
 	}
 };
@@ -79,15 +80,14 @@ class BasicTypeExprAst : public ExprAst {
 private:
 	std::string type; // Types that don't need special handling can be represented as just a string
 public:
-	inline BasicTypeExprAst(std::string type)
-	{
-		this->type = type;
-	}
+	inline BasicTypeExprAst(SourceLocation loc, std::string type)
+		: ExprAst(loc), type(type)
+	{}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "BasicTypeExprAst { type: " << this->type << " }";
+		ss << "BasicTypeExprAst (" << this->loc.str() << ") { type: " << this->type << " }";
 		return ss.str();
 	}
 };
@@ -96,15 +96,14 @@ class TypeExprAst : public ExprAst {
 private:
 	std::unique_ptr<ExprAst> type; // A type can be either a basic type or a function prototype as of now
 public:
-	inline TypeExprAst(std::unique_ptr<ExprAst> type)
-	{
-		this->type = std::move(type);
-	}
+	inline TypeExprAst(SourceLocation loc, std::unique_ptr<ExprAst> type)
+		: ExprAst(loc), type(std::move(type))
+	{}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "TypeExprAst { type: " << this->type->to_string() << " }";
+		ss << "TypeExprAst (" << this->loc.str() <<  ") { type: " << this->type->to_string() << " }";
 		return ss.str();
 	}
 };
@@ -113,34 +112,35 @@ class ArrayTypeExprAst : public ExprAst {
 private:
 	std::unique_ptr<TypeExprAst> recursing_type;
 public:
-	inline ArrayTypeExprAst(std::unique_ptr<TypeExprAst> recursing_type)
-		: recursing_type(std::move(recursing_type))
+	inline ArrayTypeExprAst(SourceLocation loc, std::unique_ptr<TypeExprAst> recursing_type)
+		: ExprAst(loc), recursing_type(std::move(recursing_type))
 	{}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "ArrayTypeExprAst { recursing_type: " << this->recursing_type->to_string() << " }";
+		ss << "ArrayTypeExprAst (" << this->loc.str() << ") { recursing_type: " << this->recursing_type->to_string() << " }";
 		return ss.str();
 	}
 };
 
 class FunctionParamAst {
 private:
+	SourceLocation loc;
 	std::unique_ptr<VariableExprAst> var;
-	std::unique_ptr<ExprAst> type;
+	std::unique_ptr<TypeExprAst> type;
 public:
-	inline FunctionParamAst(std::unique_ptr<VariableExprAst> var, std::unique_ptr<TypeExprAst> type)
-	{
-		this->var = std::move(var);
-		this->type = std::move(type);
-	}
+	inline FunctionParamAst(SourceLocation loc,
+	                        std::unique_ptr<VariableExprAst> var,
+	                        std::unique_ptr<TypeExprAst> type)
+		: loc(loc), var(std::move(var)), type(std::move(type))
+	{}
 
 	inline std::string to_string()
 	{
 		std::stringstream ss;
 
-		ss << "FunctionParamAst { var: " << this->var->to_string() <<
+		ss << "FunctionParamAst (" << this->loc.str() << ") { var: " << this->var->to_string() <<
 			", type: " << this->type->to_string() << " }";
 
 		return ss.str();
@@ -152,17 +152,16 @@ private:
 	std::vector<std::unique_ptr<FunctionParamAst>> params;
 	std::unique_ptr<TypeExprAst> return_type; // `nullptr` means no return
 public:
-	inline FunctionProtoExprAst(std::vector<std::unique_ptr<FunctionParamAst>> args,
+	inline FunctionProtoExprAst(SourceLocation loc,
+	                            std::vector<std::unique_ptr<FunctionParamAst>> params,
 	                            std::unique_ptr<TypeExprAst> return_type)
-	{
-		this->params = std::move(args);
-		this->return_type = std::move(return_type);
-	}
+		: ExprAst(loc), params(std::move(params)), return_type(std::move(return_type))
+	{}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "FunctionProtoExprAst { params: [";
+		ss << "FunctionProtoExprAst (" << this->loc.str() << ") { params: [";
 		for (auto &param : this->params) {
 			ss << param->to_string() << " ";
 		}
@@ -177,13 +176,13 @@ class CodeblockExprAst : public ExprAst {
 private:
 	std::vector<std::unique_ptr<ExprAst>> subexprs;
 public:
-	inline CodeblockExprAst(std::vector<std::unique_ptr<ExprAst>> subexprs)
-		: subexprs(std::move(subexprs))
+	inline CodeblockExprAst(SourceLocation loc, std::vector<std::unique_ptr<ExprAst>> subexprs)
+		: ExprAst(loc), subexprs(std::move(subexprs))
 	{}
 
 	virtual inline std::string to_string() override {
 		std::stringstream ss;
-		ss << "CodeblockExprAst { subexprs: [";
+		ss << "CodeblockExprAst (" << this->loc.str() << ") { subexprs: [";
 		for (auto &expr : this->subexprs) {
 			ss << expr->to_string() << " ";
 		}
@@ -198,8 +197,10 @@ private:
 	std::unique_ptr<FunctionProtoExprAst> proto;
 	std::unique_ptr<CodeblockExprAst> body;
 public:
-	inline FunctionExprAst(std::unique_ptr<FunctionProtoExprAst> proto, std::unique_ptr<CodeblockExprAst> body)
-		: proto(std::move(proto)), body(std::move(body))
+	inline FunctionExprAst(SourceLocation loc,
+	                       std::unique_ptr<FunctionProtoExprAst> proto,
+	                       std::unique_ptr<CodeblockExprAst> body)
+		: ExprAst(loc), proto(std::move(proto)), body(std::move(body))
 	{}
 
 	virtual inline std::string to_string() override
@@ -217,19 +218,18 @@ private:
 	std::unique_ptr<TypeExprAst> explicit_type; // Can be null (type should be infered)
 	std::unique_ptr<ExprAst> value; // Can be null (should be zeroed)
 public:
-	inline DeclarationExprAst(std::unique_ptr<VariableExprAst> name,
+	inline DeclarationExprAst(SourceLocation loc,
+	                          std::unique_ptr<VariableExprAst> name,
 	                          std::unique_ptr<TypeExprAst> explicit_type,
 	                          std::unique_ptr<ExprAst> value)
-	{
-		this->name = std::move(name);
-		this->explicit_type = std::move(explicit_type);
-		this->value = std::move(value);
-	}
+		: ExprAst(loc), name(std::move(name)), explicit_type(std::move(explicit_type)), value(std::move(value))
+	{}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "DeclarationExprAst { name: " << this->name->to_string() << ", explicit_type: " <<
+		ss << "DeclarationExprAst (" << this->loc.str() << ") { name: " <<
+			this->name->to_string() << ", explicit_type: " <<
 			(this->explicit_type ? this->explicit_type->to_string() : "None") << ", value: " <<
 			(this->value ? this->value->to_string() : "None");
 		return ss.str();
@@ -242,14 +242,17 @@ public:
 	std::string op;
 	std::unique_ptr<ExprAst> right;
 public:
-	inline BinaryOpExprAst(std::unique_ptr<ExprAst> left, std::string op, std::unique_ptr<ExprAst> right)
-		: left(std::move(left)), op(op), right(std::move(right))
+	inline BinaryOpExprAst(SourceLocation loc,
+	                       std::unique_ptr<ExprAst> left,
+	                       std::string op,
+	                       std::unique_ptr<ExprAst> right)
+		: ExprAst(loc), left(std::move(left)), op(op), right(std::move(right))
 	{}
 
 	virtual inline std::string to_string() override {
 		std::stringstream ss;
 
-		ss << "BinaryOpExprAst { left: " << this->left->to_string() <<
+		ss << "BinaryOpExprAst (" << this->loc.str() << ") { left: " << this->left->to_string() <<
 			", op: " << this->op <<
 			", right: " << this->right->to_string() << " }";
 
@@ -264,14 +267,16 @@ private:
 	std::string function;
 	std::vector<std::unique_ptr<ExprAst>> args;
 public:
-	inline CallExprAst(std::string function, std::vector<std::unique_ptr<ExprAst>> args)
-		: function(function), args(std::move(args))
+	inline CallExprAst(SourceLocation loc,
+	                   std::string function,
+	                   std::vector<std::unique_ptr<ExprAst>> args)
+		: ExprAst(loc), function(function), args(std::move(args))
 	{}
 
 	virtual inline std::string to_string() override {
 		std::stringstream ss;
 
-		ss << "CallExprAst { function: " << this->function << ", args: [";
+		ss << "CallExprAst (" << this->loc.str() << ") { function: " << this->function << ", args: [";
 		for (auto &arg : this->args) {
 			ss << arg->to_string();
 		}

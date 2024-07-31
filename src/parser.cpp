@@ -7,9 +7,9 @@
 //                 [Colon] [Equals] <Expr>
 //                 [Colon] [Ident]
 std::unique_ptr<DeclarationExprAst>
-Parser::parse_declaration(std::string ident)
+Parser::parse_declaration(SourceLocation loc, std::string ident)
 {
-	std::unique_ptr<VariableExprAst> var_ast = std::make_unique<VariableExprAst>(ident);
+	std::unique_ptr<VariableExprAst> var_ast = std::make_unique<VariableExprAst>(loc, ident);
 	std::unique_ptr<DeclarationExprAst> decl_ast = nullptr;
 	std::unique_ptr<TypeExprAst> explicit_type = nullptr;
 	std::unique_ptr<ExprAst> value = nullptr;
@@ -43,7 +43,7 @@ Parser::parse_declaration(std::string ident)
 	}
 
 	decl_ast = std::make_unique<DeclarationExprAst>(
-		std::move(var_ast), std::move(explicit_type), std::move(value)
+		loc, std::move(var_ast), std::move(explicit_type), std::move(value)
 	);
 
 	return decl_ast;
@@ -52,19 +52,21 @@ Parser::parse_declaration(std::string ident)
 std::unique_ptr<TypeExprAst>
 Parser::parse_type()
 {
+	auto loc = this->token->loc;
+
 	switch (this->token->type) {
 	case TokenType::Fn:
 	{
 		auto proto = this->parse_function_proto();
 		if (!proto)
 			return nullptr;
-		return std::make_unique<TypeExprAst>(std::move(proto));
+		return std::make_unique<TypeExprAst>(loc, std::move(proto));
 	}
 	case TokenType::Identifier:
 	{
-		auto basic_type = BasicTypeExprAst { this->token->value };
+		auto basic_type = BasicTypeExprAst { loc, this->token->value };
 		this->advance();
-		return std::make_unique<TypeExprAst>(std::make_unique<BasicTypeExprAst>(basic_type));
+		return std::make_unique<TypeExprAst>(loc, std::make_unique<BasicTypeExprAst>(basic_type));
 	}
 	case TokenType::LeftBracket:
 	{
@@ -79,7 +81,7 @@ Parser::parse_type()
 		if (!recursing_type)
 			return nullptr;
 
-		return std::make_unique<TypeExprAst>(std::make_unique<ArrayTypeExprAst>(std::move(recursing_type)));
+		return std::make_unique<TypeExprAst>(loc, std::make_unique<ArrayTypeExprAst>(loc, std::move(recursing_type)));
 	}
 	default:
 		break;
@@ -89,7 +91,7 @@ Parser::parse_type()
 }
 
 std::unique_ptr<CallExprAst>
-Parser::parse_call(std::string ident)
+Parser::parse_call(SourceLocation loc, std::string ident)
 {
 	std::vector<std::unique_ptr<ExprAst>> args;
 
@@ -113,27 +115,28 @@ Parser::parse_call(std::string ident)
 
 	this->advance(); // Skip over right parenthesis
 
-	return std::make_unique<CallExprAst>(ident, std::move(args));
+	return std::make_unique<CallExprAst>(loc, ident, std::move(args));
 }
 
 std::unique_ptr<ExprAst>
 Parser::parse_identifier()
 {
 	std::string ident = this->token->value;
+	SourceLocation loc = this->token->loc;
 
 	if (!this->advance())
 		return nullptr;
 
 	switch (this->token->type) {
 	case TokenType::Colon:
-		return this->parse_declaration(ident);
+		return this->parse_declaration(loc, ident);
 	case TokenType::LeftParen:
-		return this->parse_call(ident);
+		return this->parse_call(loc, ident);
 	default:
 		break;
 	}
 
-	return std::make_unique<VariableExprAst>(ident);
+	return std::make_unique<VariableExprAst>(loc, ident);
 }
 
 // Token Patterns: [Fn] [Identifier] [LeftParen] ([Identifier] [Colon] [Type] [Comma])* [RightParen]
@@ -144,6 +147,7 @@ Parser::parse_function_proto()
 {
 	std::vector<std::unique_ptr<FunctionParamAst>> params = {};
 	std::unique_ptr<TypeExprAst> return_type = nullptr;
+	auto loc = this->token->loc;
 
 	if (!this->advance())
 		return nullptr;
@@ -182,14 +186,15 @@ Parser::parse_function_proto()
 
 	this->advance();
 
-	return std::make_unique<FunctionProtoExprAst>(std::move(params), std::move(return_type));
+	return std::make_unique<FunctionProtoExprAst>(loc, std::move(params), std::move(return_type));
 }
 
 // Token Patterns: [Ident] [Colon] [Type]
 std::unique_ptr<FunctionParamAst>
 Parser::parse_function_param()
 {
-	std::unique_ptr<VariableExprAst> var = std::make_unique<VariableExprAst>(this->token->value);
+	auto loc = this->token->loc;
+	std::unique_ptr<VariableExprAst> var = std::make_unique<VariableExprAst>(loc, this->token->value);
 	if (!this->advance() || this->token->type != TokenType::Colon)
 		return nullptr;
 
@@ -200,13 +205,14 @@ Parser::parse_function_param()
 	if (!type)
 		return nullptr;
 
-	return std::make_unique<FunctionParamAst>(std::move(var), std::move(type));
+	return std::make_unique<FunctionParamAst>(loc, std::move(var), std::move(type));
 }
 
 // Token Patterns: [LeftCurly] <Expr>* [RightCurly]
 std::unique_ptr<CodeblockExprAst>
 Parser::parse_codeblock()
 {
+	auto loc = this->token->loc;
 	std::vector<std::unique_ptr<ExprAst>> subexprs;
 
 	if (!this->advance())
@@ -221,7 +227,7 @@ Parser::parse_codeblock()
 
 	this->advance();
 
-	return std::make_unique<CodeblockExprAst>(std::move(subexprs));
+	return std::make_unique<CodeblockExprAst>(loc, std::move(subexprs));
 }
 
 std::unique_ptr<ExprAst>
@@ -242,6 +248,7 @@ Parser::parse_binop_rhs(int expr_prec, std::unique_ptr<ExprAst> lhs)
 	 * - In the previous call, the following BinOp expression will be created: `{ left: 1, op: '+', right: { <newly returned RHS> }`
 	 * - Finally, it's gonna build the following expression on the next loop: `{ left: <everything until now>, op: '-', right: 5 }`
 	 */
+	auto loc = this->token->loc;
 	while (true) {
 		if (BinaryOpExprAst::get_precedence(this->token->value) < expr_prec)
 			return lhs;
@@ -264,7 +271,7 @@ Parser::parse_binop_rhs(int expr_prec, std::unique_ptr<ExprAst> lhs)
 				return nullptr;
 		}
 
-		lhs = std::make_unique<BinaryOpExprAst>(std::move(lhs), op, std::move(rhs));
+		lhs = std::make_unique<BinaryOpExprAst>(loc, std::move(lhs), op, std::move(rhs));
 	}
 }
 
@@ -282,17 +289,18 @@ Parser::parse_number()
 
 	this->advance();
 
-	return std::make_unique<NumberExprAst>(value, loc);
+	return std::make_unique<NumberExprAst>(loc, value);
 }
 
 std::unique_ptr<StringExprAst>
 Parser::parse_string()
 {
+	auto loc = this->token->loc;
 	std::string value = this->token->value;
 	
 	this->advance();
 
-	return std::make_unique<StringExprAst>(value);
+	return std::make_unique<StringExprAst>(loc, value);
 }
 
 std::unique_ptr<ExprAst>
@@ -329,6 +337,7 @@ Parser::parse_primary()
 		break;
 	case TokenType::Fn:
 	{
+		auto loc = this->token->loc;
 		auto proto = this->parse_function_proto();
 		if (!proto)
 			return nullptr;
@@ -340,7 +349,7 @@ Parser::parse_primary()
 		if (!body)
 			return nullptr;
 
-		expr = std::make_unique<FunctionExprAst>(std::move(proto), std::move(body));
+		expr = std::make_unique<FunctionExprAst>(loc, std::move(proto), std::move(body));
 		break;
 	}
 	case TokenType::LeftCurly:

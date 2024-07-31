@@ -92,8 +92,11 @@ std::unique_ptr<CallExprAst>
 Parser::parse_call(std::string ident)
 {
 	std::vector<std::unique_ptr<ExprAst>> args;
+
+	this->advance();
+
 	while (true) {
-		if (!this->advance())
+		if (!this->token)
 			return nullptr;
 
 		if (this->token->type == TokenType::RightParen)

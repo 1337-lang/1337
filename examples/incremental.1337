@@ -26,6 +26,10 @@ sum := fn i64 (x: i32, y: i32) {
 	result
 }
 
+print(10)
+
 main := fn (argc: i32, argv: []str) {
 	number := 10
 }
+
+print("abc")

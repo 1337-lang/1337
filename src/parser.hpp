@@ -10,7 +10,11 @@ private:
 	Lexer lexer;
 	std::unique_ptr<Token> token = nullptr;
 public:
-	inline Parser(std::string_view content): lexer(content) {
+	inline Parser(std::string content, std::string filepath) noexcept: lexer(content, filepath) {
+		this->advance();
+	}
+
+	inline Parser(std::string filepath): lexer(filepath) {
 		this->advance();
 	}
 public:

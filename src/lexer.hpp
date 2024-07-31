@@ -2,8 +2,13 @@
 #define LEXER_HPP
 
 #include <string>
-#include <string_view>
 #include <memory>
+
+struct SourceLocation {
+	std::string filepath = "<memory>";
+	size_t line = 0;
+	size_t column = 0;
+};
 
 enum class TokenType: int {
 	Eof = -1,
@@ -39,15 +44,17 @@ enum class TokenType: int {
 struct Token {
 	TokenType type;
 	std::string value;
-	// TODO: keep position information (line, column)
+	SourceLocation loc;
 };
 
 class Lexer {
 private:
-	std::string_view content;
+	std::string content;
 	size_t cursor;
+	SourceLocation loc;
 public:
-	Lexer(std::string_view content);
+	Lexer(std::string content, std::string filepath) noexcept;
+	Lexer(std::string filepath); // Can throw exception if the file doesn't open or doesn't read
 public:
 	std::unique_ptr<Token>
 	tokenize();

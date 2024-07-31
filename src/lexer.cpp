@@ -1,10 +1,30 @@
 #include "lexer.hpp"
+#include <stdexcept>
 #include <unordered_map>
+#include <sstream>
+#include <fstream>
 
-Lexer::Lexer(std::string_view content)
+Lexer::Lexer(std::string filepath)
+{
+	std::ifstream source(filepath);
+	if (!source.is_open()) {
+		throw std::runtime_error("Failed to open file");
+	}
+
+	std::stringstream ss;
+	ss << source.rdbuf();
+	auto content = ss.str();
+
+	this->content = content;
+	this->cursor = 0;
+	this->loc.filepath = filepath;
+}
+
+Lexer::Lexer(std::string content, std::string filepath) noexcept
 {
 	this->content = content;
 	this->cursor = 0;
+	this->loc.filepath = filepath;
 }
 
 std::unique_ptr<Token>
@@ -38,9 +58,17 @@ Lexer::tokenize()
 
 		// Handle whitespaces
 		if (std::isspace(c)) {
+			if (c == '\n') {
+				++this->loc.line;
+				loc.column = 0;
+			} else {
+				++this->loc.column;
+			}
 			++this->cursor;
 			continue;
 		}
+
+		token.loc = this->loc;
 
 		// Handle numbers
 		if (std::isdigit(c) || c == '.') {

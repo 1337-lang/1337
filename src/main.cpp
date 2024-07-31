@@ -11,16 +11,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	std::ifstream source(argv[1]);
-	if (!source.is_open()) {
-		std::cout << "Failed to read source file: " << argv[1] << std::endl;
-		return 1;
-	}
-
-	std::stringstream ss;
-	ss << source.rdbuf();
-	auto content = ss.str();
-
 	/*
 	auto lexer = Lexer(content);
 	std::unique_ptr<Token> token;
@@ -40,7 +30,7 @@ int main(int argc, char **argv)
 	}
 	*/
 
-	auto parser = Parser(content);
+	auto parser = Parser(argv[1]);
 
 	while (true) {
 		auto expr = parser.parse_expression();

@@ -3,11 +3,21 @@
 
 #include <string>
 #include <memory>
+#include <sstream>
 
 struct SourceLocation {
 	std::string filepath = "<memory>";
 	size_t line = 0;
 	size_t column = 0;
+
+	inline std::string str()
+	{
+		std::stringstream ss;
+
+		ss << this->filepath << "@"
+			<< this->line << ":" << this->column;
+		return ss.str();
+	}
 };
 
 enum class TokenType: int {

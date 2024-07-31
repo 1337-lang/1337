@@ -272,6 +272,7 @@ std::unique_ptr<NumberExprAst>
 Parser::parse_number()
 {
 	double value;
+	auto loc = this->token->loc;
 
 	try {
 		value = stod(this->token->value);
@@ -281,7 +282,7 @@ Parser::parse_number()
 
 	this->advance();
 
-	return std::make_unique<NumberExprAst>(value);
+	return std::make_unique<NumberExprAst>(value, loc);
 }
 
 std::unique_ptr<StringExprAst>

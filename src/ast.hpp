@@ -5,14 +5,21 @@
 #include <vector>
 #include <memory>
 #include <sstream>
+#include "lexer.hpp"
 #include "llvm.hpp"
 
 class ExprAst {
+protected:
+	SourceLocation loc;
 public:
 	virtual std::string to_string() = 0;
 	virtual llvm::Value *codegen()
 	{
 		return nullptr;
+	}
+	virtual inline SourceLocation source_loc()
+	{
+		return this->loc;
 	}
 };
 
@@ -21,15 +28,16 @@ private:
 	// For now, all numbers will be double
 	double number;
 public:
-	inline NumberExprAst(double number)
+	inline NumberExprAst(double number, SourceLocation loc)
 	{
 		this->number = number;
+		this->loc = loc;
 	}
 
 	virtual inline std::string to_string() override
 	{
 		std::stringstream ss;
-		ss << "NumberExprAst { number: " << this->number << " }";
+		ss << "NumberExprAst (" << this->loc.str() << ") { number: " << this->number << " }";
 		return ss.str();
 	}
 };

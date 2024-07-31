@@ -1,7 +1,6 @@
 #ifndef _PARSER_HPP_
 #define _PARSER_HPP_
 
-#include <string_view>
 #include "lexer.hpp"
 #include "ast.hpp"
 

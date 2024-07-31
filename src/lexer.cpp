@@ -17,6 +17,8 @@ Lexer::Lexer(std::string filepath)
 
 	this->content = content;
 	this->cursor = 0;
+	this->loc.line = 1;
+	this->loc.column = 1;
 	this->loc.filepath = filepath;
 }
 
@@ -24,6 +26,8 @@ Lexer::Lexer(std::string content, std::string filepath) noexcept
 {
 	this->content = content;
 	this->cursor = 0;
+	this->loc.line = 1;
+	this->loc.column = 1;
 	this->loc.filepath = filepath;
 }
 
@@ -58,13 +62,7 @@ Lexer::tokenize()
 
 		// Handle whitespaces
 		if (std::isspace(c)) {
-			if (c == '\n') {
-				++this->loc.line;
-				loc.column = 0;
-			} else {
-				++this->loc.column;
-			}
-			++this->cursor;
+			this->advance();
 			continue;
 		}
 
@@ -73,7 +71,7 @@ Lexer::tokenize()
 		// Handle numbers
 		if (std::isdigit(c) || c == '.') {
 			token.type = TokenType::Integer;
-			for (; this->cursor < this->content.length(); ++this->cursor) {
+			for (; this->cursor < this->content.length(); this->advance()) {
 				auto next = content[this->cursor];
 				if (next == '.') {
 					token.type = TokenType::Float;
@@ -92,7 +90,7 @@ Lexer::tokenize()
 		if (std::isalpha(c)) {
 			token.type = TokenType::Identifier;
 			token.value = std::string(1, c);
-			while (++this->cursor < this->content.length()) {
+			while (this->advance() < this->content.length()) {
 				auto next = this->content[this->cursor];
 				if (!std::isalnum(next) && next != '_') {
 					break;
@@ -110,10 +108,10 @@ Lexer::tokenize()
 		// Handle strings
 		if (c == '"') {
 			token.type = TokenType::String;
-			while (++this->cursor < this->content.length()) {
+			while (this->advance() < this->content.length()) {
 				auto next = this->content[this->cursor];
 				if (next == '"') {
-					++this->cursor;
+					this->advance();
 					break;
 				}
 
@@ -126,10 +124,10 @@ Lexer::tokenize()
 		// Handle characters
 		if (c == '\'') {
 			token.type = TokenType::Char;
-			while (++this->cursor < this->content.length()) {
+			while (this->advance() < this->content.length()) {
 				auto next = this->content[this->cursor];
 				if (next == '\'') {
-					++this->cursor;
+					this->advance();
 					break;
 				}
 
@@ -143,13 +141,13 @@ Lexer::tokenize()
 		if (symbols.find(c) != symbols.end()) {
 			token.type = symbols[c];
 			token.value = std::string(1, c);
-			++this->cursor;
+			this->advance();
 			return std::make_unique<Token>(token);
 		}
 
 		// Handle unknown
 		token.type = TokenType::Unknown;
-		for (; this->cursor < this->content.length(); ++this->cursor) {
+		for (; this->cursor < this->content.length(); this->advance()) {
 			auto next = this->content[this->cursor];
 			if (std::isspace(next)) {
 				break;

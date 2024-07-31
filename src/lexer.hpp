@@ -68,6 +68,24 @@ public:
 public:
 	std::unique_ptr<Token>
 	tokenize();
+private:
+	inline size_t
+	advance()
+	{
+		++this->cursor;
+		if (this->cursor >= this->content.length())
+			return this->cursor;
+
+		auto c = this->content[this->cursor];
+		if (c == '\n') {
+			this->loc.line += 1;
+			this->loc.column = 1;
+		} else if (c != '\r') {
+			this->loc.column += 1;
+		}
+
+		return this->cursor;
+	}
 };
 
 #endif

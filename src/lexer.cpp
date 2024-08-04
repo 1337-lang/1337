@@ -38,7 +38,8 @@ Lexer::tokenize()
 
 	static std::unordered_map<std::string, TokenType> keywords = {
 		{ "fn", TokenType::Fn },
-		{ "mut", TokenType::Mut }
+		{ "mut", TokenType::Mut },
+		{ "extern", TokenType::Extern }
 	};
 
 	static std::unordered_map<char, TokenType> symbols = {

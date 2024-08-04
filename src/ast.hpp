@@ -17,10 +17,6 @@ public:
 	{}
 public:
 	virtual std::string to_string() = 0;
-	virtual llvm::Value *codegen()
-	{
-		return nullptr;
-	}
 	virtual inline SourceLocation source_loc()
 	{
 		return this->loc;
@@ -213,7 +209,7 @@ public:
 };
 
 class DeclarationExprAst : public ExprAst {
-private:
+public:
 	std::unique_ptr<VariableExprAst> name;
 	std::unique_ptr<TypeExprAst> explicit_type; // Can be null (type should be infered)
 	std::unique_ptr<ExprAst> value; // Can be null (should be zeroed)
@@ -282,6 +278,24 @@ public:
 		}
 		ss << "] }";
 
+		return ss.str();
+	}
+};
+
+class ExternExprAst : public ExprAst {
+private:
+	std::unique_ptr<DeclarationExprAst> decl;
+public:
+	inline ExternExprAst(SourceLocation loc, std::unique_ptr<DeclarationExprAst> decl)
+		: ExprAst(loc), decl(std::move(decl))
+	{}
+	virtual inline std::string to_string() override
+	{
+		std::stringstream ss;
+		ss << "ExternExprAst (" << this->loc.str() << ") { name: " <<
+			this->decl->name->to_string() << ", explicit_type: " <<
+			(this->decl->explicit_type ? this->decl->explicit_type->to_string() : "None") << ", value: " <<
+			(this->decl->value ? this->decl->value->to_string() : "None");
 		return ss.str();
 	}
 };

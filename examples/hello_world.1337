@@ -1,3 +1,5 @@
+extern printf : fn i32 (fmt: str)
+
 main := fn () {
-	print("hello world!")
+	printf("hello world!")
 }

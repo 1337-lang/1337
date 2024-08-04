@@ -12,5 +12,27 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Verifier.h>
+#include <llvm/IR/Constant.h>
+#include <llvm/Target/TargetMachine.h>
+#include <llvm/Target/TargetOptions.h>
+#include <llvm/MC/TargetRegistry.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/TargetParser/Host.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/FileSystem.h>
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/Support/CodeGen.h>
+
+class Codegen {
+private:
+	llvm::LLVMContext context;
+	llvm::Module module;
+	llvm::IRBuilder<> builder;
+public:
+	inline Codegen()
+		: context(), builder(this->context), module("<module>", this->context)
+	{}
+};
 
 #endif
+

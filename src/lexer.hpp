@@ -35,6 +35,7 @@ enum class TokenType: int {
 	// Keywords
 	Fn,
 	Mut,
+	Extern,
 
 	// Symbols
 	LeftCurly,

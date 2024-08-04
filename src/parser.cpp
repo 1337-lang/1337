@@ -352,6 +352,20 @@ Parser::parse_primary()
 		expr = std::make_unique<FunctionExprAst>(loc, std::move(proto), std::move(body));
 		break;
 	}
+	case TokenType::Extern:
+	{
+		if (!this->advance() || this->token->type != TokenType::Identifier)
+			return nullptr;
+		auto ident = *this->token;
+		if (!this->advance() || this->token->type != TokenType::Colon)
+			return nullptr;
+
+		auto decl_expr = this->parse_declaration(ident.loc, ident.value);
+		if (!decl_expr)
+			return nullptr;
+		expr = std::make_unique<ExternExprAst>(ident.loc, std::move(decl_expr));
+		break;
+	}
 	case TokenType::LeftCurly:
 		expr = this->parse_codeblock();
 		break;

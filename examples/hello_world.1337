@@ -1,4 +1,5 @@
-extern printf : fn i32 (fmt: str)
+thing := 10
+text := "test"
 
 main := fn () {
 	printf("hello world!")

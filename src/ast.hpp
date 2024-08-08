@@ -24,7 +24,7 @@ public:
 };
 
 class NumberExprAst : public ExprAst {
-private:
+public:
 	// For now, all numbers will be double
 	double number;
 public:
@@ -41,7 +41,7 @@ public:
 };
 
 class StringExprAst : public ExprAst {
-private:
+public:
 	std::string value;
 public:
 	inline StringExprAst(SourceLocation loc, std::string value)
@@ -57,7 +57,7 @@ public:
 };
 
 class VariableExprAst : public ExprAst {
-private:
+public:
 	std::string name;
 public:
 	inline VariableExprAst(SourceLocation loc, std::string name)
@@ -73,7 +73,7 @@ public:
 };
 
 class BasicTypeExprAst : public ExprAst {
-private:
+public:
 	std::string type; // Types that don't need special handling can be represented as just a string
 public:
 	inline BasicTypeExprAst(SourceLocation loc, std::string type)
@@ -89,7 +89,7 @@ public:
 };
 
 class TypeExprAst : public ExprAst {
-private:
+public:
 	std::unique_ptr<ExprAst> type; // A type can be either a basic type or a function prototype as of now
 public:
 	inline TypeExprAst(SourceLocation loc, std::unique_ptr<ExprAst> type)
@@ -105,7 +105,7 @@ public:
 };
 
 class ArrayTypeExprAst : public ExprAst {
-private:
+public:
 	std::unique_ptr<TypeExprAst> recursing_type;
 public:
 	inline ArrayTypeExprAst(SourceLocation loc, std::unique_ptr<TypeExprAst> recursing_type)
@@ -121,7 +121,7 @@ public:
 };
 
 class FunctionParamAst {
-private:
+public:
 	SourceLocation loc;
 	std::unique_ptr<VariableExprAst> var;
 	std::unique_ptr<TypeExprAst> type;
@@ -144,7 +144,7 @@ public:
 };
 
 class FunctionProtoExprAst : public ExprAst {
-private:
+public:
 	std::vector<std::unique_ptr<FunctionParamAst>> params;
 	std::unique_ptr<TypeExprAst> return_type; // `nullptr` means no return
 public:
@@ -169,7 +169,7 @@ public:
 };
 
 class CodeblockExprAst : public ExprAst {
-private:
+public:
 	std::vector<std::unique_ptr<ExprAst>> subexprs;
 public:
 	inline CodeblockExprAst(SourceLocation loc, std::vector<std::unique_ptr<ExprAst>> subexprs)
@@ -189,7 +189,7 @@ public:
 };
 
 class FunctionExprAst : public ExprAst {
-private:
+public:
 	std::unique_ptr<FunctionProtoExprAst> proto;
 	std::unique_ptr<CodeblockExprAst> body;
 public:
@@ -259,7 +259,7 @@ public:
 };
 
 class CallExprAst : public ExprAst {
-private:
+public:
 	std::string function;
 	std::vector<std::unique_ptr<ExprAst>> args;
 public:
@@ -283,7 +283,7 @@ public:
 };
 
 class ExternExprAst : public ExprAst {
-private:
+public:
 	std::unique_ptr<DeclarationExprAst> decl;
 public:
 	inline ExternExprAst(SourceLocation loc, std::unique_ptr<DeclarationExprAst> decl)

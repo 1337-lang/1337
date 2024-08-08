@@ -23,16 +23,5 @@
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Support/CodeGen.h>
 
-class Codegen {
-private:
-	llvm::LLVMContext context;
-	llvm::Module module;
-	llvm::IRBuilder<> builder;
-public:
-	inline Codegen()
-		: context(), builder(this->context), module("<module>", this->context)
-	{}
-};
-
 #endif
 

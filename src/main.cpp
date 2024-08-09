@@ -60,6 +60,7 @@ int main(int argc, char **argv)
 		}
 	}
 	codegen.dump();
+	codegen.write_object("output.o");
 
 	return 0;
 }

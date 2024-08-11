@@ -293,10 +293,38 @@ Parser::parse_string()
 {
 	auto loc = this->token->loc;
 	std::string value = this->token->value;
+	std::string fmt = "";
+
+	bool prev_backslash = false;
+	for (size_t i = 0; i < value.length(); ++i) {
+		auto c = value[i];
+
+		if (c == '\\') {
+			prev_backslash = true;
+			continue;
+		}
+
+		if (!prev_backslash) {
+			fmt.push_back(c);
+			continue;
+		}
+
+		// Previous character was a backslash, do special handling
+		switch (c) {
+		case 'n':
+			fmt.push_back('\n');
+			break;
+		default:
+			fmt.push_back(c);
+			break;
+		}
+
+		prev_backslash = false;
+	}
 	
 	this->advance();
 
-	return std::make_unique<StringExprAst>(loc, value);
+	return std::make_unique<StringExprAst>(loc, fmt);
 }
 
 std::unique_ptr<ExprAst>

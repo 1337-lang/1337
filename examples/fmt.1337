@@ -1,6 +1,6 @@
 main := fn () {
 	number : i64 = 99999999999999
 	text := "this is a text"
-	printf("number: %ld", number)
-	printf("text: %s", text)
+	printf("number: %ld\n", number)
+	printf("text: %s\n", text)
 }

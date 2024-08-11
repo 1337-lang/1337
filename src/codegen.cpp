@@ -15,7 +15,7 @@ bool Codegen::include(DeclarationExprAst *expr)
 
 		llvm::Constant *value;
 		if (type->isIntegerTy()) {
-			value = this->builder.getIntN(type->getIntegerBitWidth(), static_cast<uint64_t>(number->number));
+			value = llvm::Constant::getIntegerValue(type, llvm::APInt(type->getIntegerBitWidth(), number->number, 10));
 		} else {
 			value = llvm::ConstantFP::get(type, number->number);
 		}

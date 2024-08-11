@@ -25,10 +25,9 @@ public:
 
 class NumberExprAst : public ExprAst {
 public:
-	// For now, all numbers will be double
-	double number;
+	std::string number;
 public:
-	inline NumberExprAst(SourceLocation loc, double number)
+	inline NumberExprAst(SourceLocation loc, std::string number)
 		: ExprAst(loc), number(number)
 	{}
 

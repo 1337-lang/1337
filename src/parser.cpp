@@ -278,14 +278,8 @@ Parser::parse_binop_rhs(int expr_prec, std::unique_ptr<ExprAst> lhs)
 std::unique_ptr<NumberExprAst>
 Parser::parse_number()
 {
-	double value;
 	auto loc = this->token->loc;
-
-	try {
-		value = stod(this->token->value);
-	} catch (...) {
-		return nullptr;
-	}
+	auto value = this->token->value;
 
 	this->advance();
 

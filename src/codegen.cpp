@@ -23,7 +23,9 @@ bool Codegen::include(DeclarationExprAst *expr)
 		this->variables[expr->name->name] = var;
 		return true;
 	} else if (auto str = dynamic_cast<StringExprAst *>(expr->value.get()); str != nullptr) {
-		auto value = builder->CreateGlobalStringPtr(str->value, expr->name->name, 0, &this->module);
+		auto value = builder->CreateGlobalStringPtr(str->value);
+		auto var = new llvm::GlobalVariable(module, builder->getPtrTy(), false, llvm::GlobalValue::ExternalLinkage, value, expr->name->name);
+		this->variables[expr->name->name] = var;
 		return true;
 	} else if (auto func = dynamic_cast<FunctionExprAst *>(expr->value.get()); func != nullptr) {
 		auto ret_type = builder->getVoidTy();

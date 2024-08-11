@@ -1,0 +1,10 @@
+sync my_number_sync : i32 = 10
+
+fn do_thing() {
+	my_number_sync += 10 # will write-lock the number, write, unlock
+	print("thing done")
+}
+
+main := fn () {
+	async do_thing()
+}

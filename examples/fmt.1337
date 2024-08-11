@@ -1,0 +1,4 @@
+main := fn () {
+	number : i64 = 99999999999999
+	printf("number: %ld", number)
+}

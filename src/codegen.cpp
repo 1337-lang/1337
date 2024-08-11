@@ -20,6 +20,7 @@ bool Codegen::include(DeclarationExprAst *expr)
 			value = llvm::ConstantFP::get(type, number->number);
 		}
 		auto var = new llvm::GlobalVariable(module, type, false, llvm::GlobalValue::ExternalLinkage, value, expr->name->name);
+		this->variables[expr->name->name] = var;
 		return true;
 	} else if (auto str = dynamic_cast<StringExprAst *>(expr->value.get()); str != nullptr) {
 		auto value = builder->CreateGlobalStringPtr(str->value, expr->name->name, 0, &this->module);
@@ -40,6 +41,7 @@ bool Codegen::include(DeclarationExprAst *expr)
 
 		builder->CreateRetVoid();
 		builder->ClearInsertionPoint();
+		this->variables[expr->name->name] = function;
 		return true;
 	}
 
@@ -65,10 +67,22 @@ llvm::Value *Codegen::eval(StringExprAst *str)
 	return value;
 }
 
+llvm::Value *Codegen::eval(VariableExprAst *expr)
+{
+	if (this->variables.find(expr->name) == this->variables.end())
+		return nullptr;
+
+	auto ptr = this->variables[expr->name];
+	auto type = ptr->getType();
+	return this->builder.CreateLoad(type, ptr);
+}
+
 llvm::Value *Codegen::eval(ExprAst *expr)
 {
 	if (auto str = dynamic_cast<StringExprAst *>(expr); str != nullptr)
 		return this->eval(str);
+	if (auto var = dynamic_cast<VariableExprAst *>(expr); var != nullptr)
+		return this->eval(var);
 
 	return nullptr;
 }

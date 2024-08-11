@@ -101,10 +101,12 @@ Parser::parse_call(SourceLocation loc, std::string ident)
 		if (!this->token)
 			return nullptr;
 
-		if (this->token->type == TokenType::RightParen)
+		if (this->token->type == TokenType::RightParen) {
 			break;
-		else if (this->token->type == TokenType::Comma)
+		} else if (this->token->type == TokenType::Comma) {
+			this->advance();
 			continue;
+		}
 
 		auto arg = this->parse_expression();
 		if (!arg)

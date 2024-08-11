@@ -11,6 +11,7 @@ private:
 	llvm::LLVMContext context;
 	llvm::Module module;
 	llvm::IRBuilder<> builder;
+	std::map<std::string, llvm::Value *> variables;
 public:
 	inline Codegen()
 		: context(), builder(this->context), module("<module>", this->context)
@@ -25,6 +26,7 @@ public:
 	bool include(CallExprAst *expr);
 	llvm::Value *eval(StringExprAst *expr);
 	llvm::Value *eval(ExprAst *expr);
+	llvm::Value *eval(VariableExprAst *expr);
 	llvm::Type *type(TypeExprAst *expr);
 
 	inline void dump()

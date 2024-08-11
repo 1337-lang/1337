@@ -25,6 +25,7 @@ public:
 	bool include(CallExprAst *expr);
 	llvm::Value *eval(StringExprAst *expr);
 	llvm::Value *eval(ExprAst *expr);
+	llvm::Type *type(TypeExprAst *expr);
 
 	inline void dump()
 	{

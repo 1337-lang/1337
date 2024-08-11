@@ -1,13 +1,25 @@
 #include "codegen.hpp"
-#include <iostream> // TODO:DELETE
+#include "ast.hpp"
+#include <regex>
 
 bool Codegen::include(DeclarationExprAst *expr)
 {
 	auto builder = &this->builder;
 
 	if (auto number = dynamic_cast<NumberExprAst *>(expr->value.get()); number != nullptr) {
-		auto value = llvm::ConstantFP::get(builder->getDoubleTy(), number->number);
-		auto var = new llvm::GlobalVariable(module, builder->getDoubleTy(), false, llvm::GlobalValue::ExternalLinkage, value, expr->name->name);
+		llvm::Type *type;
+		if (expr->explicit_type != nullptr)
+			type = this->type(expr->explicit_type.get());
+		else
+			type = builder->getDoubleTy();
+
+		llvm::Constant *value;
+		if (type->isIntegerTy()) {
+			value = this->builder.getIntN(type->getIntegerBitWidth(), static_cast<uint64_t>(number->number));
+		} else {
+			value = llvm::ConstantFP::get(type, number->number);
+		}
+		auto var = new llvm::GlobalVariable(module, type, false, llvm::GlobalValue::ExternalLinkage, value, expr->name->name);
 		return true;
 	} else if (auto str = dynamic_cast<StringExprAst *>(expr->value.get()); str != nullptr) {
 		auto value = builder->CreateGlobalStringPtr(str->value, expr->name->name, 0, &this->module);
@@ -57,6 +69,24 @@ llvm::Value *Codegen::eval(ExprAst *expr)
 {
 	if (auto str = dynamic_cast<StringExprAst *>(expr); str != nullptr)
 		return this->eval(str);
+
+	return nullptr;
+}
+
+llvm::Type *Codegen::type(TypeExprAst *expr)
+{
+	if (auto basic = dynamic_cast<BasicTypeExprAst *>(expr->type.get()); basic != nullptr) {
+		auto integer_regex = std::regex("[iu]([0-9]+)");
+		std::cmatch m;
+		if (std::regex_match(basic->type.c_str(), m, integer_regex)) {
+			auto nbits = atoi(m[1].str().c_str());
+			if (nbits <= 0)
+				return nullptr;
+
+			auto type = this->builder.getIntNTy(static_cast<unsigned int>(nbits));
+			return type;
+		}
+	}
 
 	return nullptr;
 }

@@ -4,6 +4,6 @@ main := fn () {
 	printf("number: %ld\n", number)
 	printf("text: %s\n", text)
 
-	myfloat : f32 = 3.1415926535
+	myfloat : f64 = 3.1415926535
 	printf("my float: %f\n", myfloat)
 }

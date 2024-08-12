@@ -20,12 +20,12 @@ bool Codegen::include(DeclarationExprAst *expr)
 			value = llvm::ConstantFP::get(type, number->number);
 		}
 		auto var = new llvm::GlobalVariable(module, type, false, llvm::GlobalValue::ExternalLinkage, value, expr->name->name);
-		this->variables[expr->name->name] = var;
+		this->variables[expr->name->name] = std::make_pair<>(type, var);
 		return true;
 	} else if (auto str = dynamic_cast<StringExprAst *>(expr->value.get()); str != nullptr) {
 		auto value = builder->CreateGlobalStringPtr(str->value);
 		auto var = new llvm::GlobalVariable(module, builder->getPtrTy(), false, llvm::GlobalValue::ExternalLinkage, value, expr->name->name);
-		this->variables[expr->name->name] = var;
+		this->variables[expr->name->name] = std::make_pair<>(var->getType(), var);
 		return true;
 	} else if (auto func = dynamic_cast<FunctionExprAst *>(expr->value.get()); func != nullptr) {
 		auto ret_type = builder->getVoidTy();
@@ -43,7 +43,7 @@ bool Codegen::include(DeclarationExprAst *expr)
 
 		builder->CreateRetVoid();
 		builder->ClearInsertionPoint();
-		this->variables[expr->name->name] = function;
+		this->variables[expr->name->name] = std::make_pair<>(type, function);
 		return true;
 	}
 
@@ -74,8 +74,9 @@ llvm::Value *Codegen::eval(VariableExprAst *expr)
 	if (this->variables.find(expr->name) == this->variables.end())
 		return nullptr;
 
-	auto ptr = this->variables[expr->name];
-	auto type = ptr->getType();
+	auto type = this->variables[expr->name].first;
+	auto ptr = this->variables[expr->name].second;
+
 	return this->builder.CreateLoad(type, ptr);
 }
 

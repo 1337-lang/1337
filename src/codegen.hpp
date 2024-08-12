@@ -5,13 +5,14 @@
 #include "ast.hpp"
 #include <map>
 #include <iostream>
+#include <utility>
 
 class Codegen {
 private:
 	llvm::LLVMContext context;
 	llvm::Module module;
 	llvm::IRBuilder<> builder;
-	std::map<std::string, llvm::Value *> variables;
+	std::map<std::string, std::pair<llvm::Type *, llvm::Value *>> variables;
 public:
 	inline Codegen()
 		: context(), builder(this->context), module("<module>", this->context)

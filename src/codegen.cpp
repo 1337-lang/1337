@@ -92,14 +92,29 @@ llvm::Value *Codegen::eval(ExprAst *expr)
 llvm::Type *Codegen::type(TypeExprAst *expr)
 {
 	if (auto basic = dynamic_cast<BasicTypeExprAst *>(expr->type.get()); basic != nullptr) {
-		auto integer_regex = std::regex("[iu]([0-9]+)");
+		auto number_regex = std::regex("[iuf]([0-9]+)");
 		std::cmatch m;
-		if (std::regex_match(basic->type.c_str(), m, integer_regex)) {
+
+		if (std::regex_match(basic->type.c_str(), m, number_regex)) {
 			auto nbits = atoi(m[1].str().c_str());
 			if (nbits <= 0)
 				return nullptr;
 
-			auto type = this->builder.getIntNTy(static_cast<unsigned int>(nbits));
+			llvm::Type *type;
+			if (m[0].str()[0] == 'f') {
+				switch (nbits) {
+				case 32:
+					type = this->builder.getFloatTy();
+					break;
+				case 64:
+					type = this->builder.getDoubleTy();
+					break;
+				default:
+					return nullptr;
+				}
+			} else {
+				type = this->builder.getIntNTy(static_cast<unsigned int>(nbits));
+			}
 			return type;
 		}
 	}

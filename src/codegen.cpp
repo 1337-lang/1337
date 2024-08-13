@@ -30,6 +30,14 @@ bool Codegen::include(DeclarationExprAst *expr)
 	} else if (auto func = dynamic_cast<FunctionExprAst *>(expr->value.get()); func != nullptr) {
 		auto ret_type = builder->getVoidTy();
 		std::vector<llvm::Type *> param_types = {};
+		for (auto &param : func->proto->params) {
+			auto type = this->type(param->type.get());
+			if (!type)
+				return false;
+
+			param_types.push_back(type);
+		}
+
 		auto name = expr->name->name;
 		auto type = llvm::FunctionType::get(ret_type, param_types, false);
 		auto function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, name, this->module);

@@ -1,6 +1,6 @@
-main := fn () {
+main := fn (argc: i32) {
 	number : i64 = 99999999999999
-	text := "this is a text"
+	text : str = "this is a text"
 	printf("number: %ld\n", number)
 	printf("text: %s\n", text)
 

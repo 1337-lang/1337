@@ -11,7 +11,7 @@ bool Codegen::include(DeclarationExprAst *expr)
 		if (expr->explicit_type != nullptr)
 			type = this->type(expr->explicit_type.get());
 		else
-			type = builder->getDoubleTy();
+			type = builder->getDoubleTy(); // TODO: Type inference
 
 		llvm::Constant *value;
 		if (type->isIntegerTy()) {
@@ -92,8 +92,10 @@ llvm::Value *Codegen::eval(ExprAst *expr)
 
 llvm::Type *Codegen::type(TypeExprAst *expr)
 {
+	llvm::Type *type = nullptr;
+	
 	if (auto basic = dynamic_cast<BasicTypeExprAst *>(expr->type.get()); basic != nullptr) {
-		auto number_regex = std::regex("[iuf]([0-9]+)");
+		auto number_regex = std::regex("[iuf]([0-9]+)$");
 		std::cmatch m;
 
 		if (std::regex_match(basic->type.c_str(), m, number_regex)) {
@@ -101,7 +103,6 @@ llvm::Type *Codegen::type(TypeExprAst *expr)
 			if (nbits <= 0)
 				return nullptr;
 
-			llvm::Type *type;
 			if (m[0].str()[0] == 'f') {
 				switch (nbits) {
 				case 32:
@@ -116,11 +117,21 @@ llvm::Type *Codegen::type(TypeExprAst *expr)
 			} else {
 				type = this->builder.getIntNTy(static_cast<unsigned int>(nbits));
 			}
-			return type;
+		} else if (basic->type == "str") {
+			type = this->builder.getPtrTy();
 		}
+	} else if (auto arr = dynamic_cast<ArrayTypeExprAst *>(expr->type.get()); arr != nullptr) {
+		auto recursing_type = this->type(arr->recursing_type.get());
+		if (!recursing_type)
+			return type;
+
+		// TODO: Implement arrays with size
+		//       Size-less arrays are just pointers
+		// type = llvm::ArrayType::get(...);
+		type = this->builder.getPtrTy();
 	}
 
-	return nullptr;
+	return type;
 }
 
 bool Codegen::include(ExprAst *expr)

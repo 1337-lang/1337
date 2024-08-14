@@ -104,6 +104,10 @@ llvm::Value *Codegen::eval(ExprAst *expr)
 		return this->eval(str);
 	if (auto var = dynamic_cast<VariableExprAst *>(expr); var != nullptr)
 		return this->eval(var);
+	if (auto var = dynamic_cast<NumberExprAst *>(expr); var != nullptr)
+		return this->eval(var);
+	if (auto var = dynamic_cast<ArrayIndexExprAst *>(expr); var != nullptr)
+		return this->eval(var);
 
 	return nullptr;
 }
@@ -152,14 +156,51 @@ llvm::Type *Codegen::type(TypeExprAst *expr)
 	return type;
 }
 
+llvm::Value *Codegen::eval(NumberExprAst *expr)
+{
+	llvm::Type *type;
+
+	// TODO: Type inference or receive type in param
+	type = builder.getInt32Ty(); 
+
+	llvm::Constant *value;
+	if (type->isIntegerTy()) {
+		value = llvm::Constant::getIntegerValue(type, llvm::APInt(type->getIntegerBitWidth(), expr->number, 10));
+	} else {
+		value = llvm::ConstantFP::get(type, expr->number);
+	}
+
+	return value;
+}
+
+llvm::Value *Codegen::eval(ArrayIndexExprAst *expr)
+{
+	if (this->variables.find(expr->var->name) == this->variables.end())
+		return nullptr;
+
+	auto arr = this->variables[expr->var->name].second;
+	if (!arr)
+		return nullptr;
+
+	auto index = this->eval(expr->index.get());
+	if (!index)
+		return nullptr;
+
+	auto deref = this->builder.getInt32(0);
+	auto type = llvm::ArrayType::get(this->builder.getPtrTy(), 64); // TODO: Just don't do this. This is such a hack
+	auto ptr = this->builder.CreateGEP(type, arr, { deref,  index }, "__array_deref__");
+	auto ptr_load = this->builder.CreateLoad(builder.getPtrTy(), ptr, "__array_value__");
+
+	return ptr_load;
+}
+
 bool Codegen::include(ExprAst *expr)
 {
 	if (auto decl_expr = dynamic_cast<DeclarationExprAst *>(expr); decl_expr != nullptr)
 		return this->include(decl_expr);
 
-	if (auto call_expr = dynamic_cast<CallExprAst *>(expr); call_expr != nullptr) {
+	if (auto call_expr = dynamic_cast<CallExprAst *>(expr); call_expr != nullptr)
 		return this->include(call_expr);
-	}
 
 	return false;
 }

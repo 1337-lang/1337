@@ -120,6 +120,24 @@ Parser::parse_call(SourceLocation loc, std::string ident)
 	return std::make_unique<CallExprAst>(loc, ident, std::move(args));
 }
 
+std::unique_ptr<ArrayIndexExprAst>
+Parser::parse_array_index(SourceLocation loc, std::string ident)
+{
+	if (!this->advance())
+		return nullptr;
+	
+	auto index = this->parse_expression();
+	if (!index)
+		return nullptr;
+
+	if (!this->token || this->token->type != TokenType::RightBracket)
+		return nullptr;
+
+	this->advance();
+
+	return std::make_unique<ArrayIndexExprAst>(loc, ident, std::move(index));
+}
+
 std::unique_ptr<ExprAst>
 Parser::parse_identifier()
 {
@@ -134,6 +152,8 @@ Parser::parse_identifier()
 		return this->parse_declaration(loc, ident);
 	case TokenType::LeftParen:
 		return this->parse_call(loc, ident);
+	case TokenType::LeftBracket:
+		return this->parse_array_index(loc, ident);
 	default:
 		break;
 	}

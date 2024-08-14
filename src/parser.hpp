@@ -51,6 +51,9 @@ private:
 	std::unique_ptr<CallExprAst>
 	parse_call(SourceLocation loc, std::string ident);
 
+	std::unique_ptr<ArrayIndexExprAst>
+	parse_array_index(SourceLocation loc, std::string ident);
+
 	std::unique_ptr<TypeExprAst>
 	parse_type();
 

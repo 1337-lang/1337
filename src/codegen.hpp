@@ -25,9 +25,11 @@ public:
 	bool include(ExprAst *expr);
 	bool include(DeclarationExprAst *expr);
 	bool include(CallExprAst *expr);
-	llvm::Value *eval(StringExprAst *expr);
 	llvm::Value *eval(ExprAst *expr);
+	llvm::Value *eval(StringExprAst *expr);
+	llvm::Value *eval(NumberExprAst *expr);
 	llvm::Value *eval(VariableExprAst *expr);
+	llvm::Value *eval(ArrayIndexExprAst *expr);
 	llvm::Type *type(TypeExprAst *expr);
 
 	inline void dump()

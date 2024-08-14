@@ -299,4 +299,22 @@ public:
 	}
 };
 
+class ArrayIndexExprAst : public ExprAst {
+public:
+	std::unique_ptr<VariableExprAst> var;
+	std::unique_ptr<ExprAst> index;
+public:
+	inline ArrayIndexExprAst(SourceLocation loc, std::string var, std::unique_ptr<ExprAst> index)
+		: ExprAst(loc), var(std::make_unique<VariableExprAst>(loc, var)), index(std::move(index))
+	{}
+	virtual inline std::string to_string() override
+	{
+		std::stringstream ss;
+		ss << "ArrayIndexExprAst (" << this->loc.str() << ") { var: " <<
+			this->var->to_string() << ", index: " << this->index->to_string() <<
+		" }";
+		return ss.str();
+	}
+};
+
 #endif

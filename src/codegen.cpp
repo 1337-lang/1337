@@ -44,6 +44,16 @@ bool Codegen::include(DeclarationExprAst *expr)
 		auto block = llvm::BasicBlock::Create(this->context, "entry", function);
 		builder->SetInsertPoint(block);
 
+		for (auto &arg : function->args()) {
+			auto i = arg.getArgNo();
+			auto type = param_types[i];
+			auto name = func->proto->params[i]->var->name;
+			auto local_var = builder->CreateAlloca(type, nullptr, name);
+			llvm::Value *val = &arg;
+			builder->CreateStore(val, local_var);
+			this->variables[name] = std::make_pair<>(type, local_var);
+		}
+
 		for (auto &subexpr : func->body->subexprs) {
 			if (!this->include(subexpr.get()))
 				return false;

@@ -6,4 +6,6 @@ main := fn (argc: i32) {
 
 	myfloat : f64 = 3.1415926535
 	printf("my float: %f\n", myfloat)
+
+	printf("argc: %d\n", argc)
 }

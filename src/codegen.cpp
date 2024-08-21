@@ -182,13 +182,16 @@ llvm::Value *Codegen::eval(ArrayIndexExprAst *expr)
 	if (!arr)
 		return nullptr;
 
+	auto loaded_arr = this->builder.CreateLoad(builder.getPtrTy(), arr, "__array_loaded__");
+
 	auto index = this->eval(expr->index.get());
 	if (!index)
 		return nullptr;
 
 	auto deref = this->builder.getInt32(0);
 	auto type = llvm::ArrayType::get(this->builder.getPtrTy(), 64); // TODO: Just don't do this. This is such a hack
-	auto ptr = this->builder.CreateGEP(type, arr, { deref,  index }, "__array_deref__");
+	auto bigtype = llvm::ArrayType::get(type, 64); // TODO: Just don't do this. This is such a hack
+	auto ptr = this->builder.CreateGEP(bigtype, loaded_arr, { deref,  index, index }, "__array_deref__");
 	auto ptr_load = this->builder.CreateLoad(builder.getPtrTy(), ptr, "__array_value__");
 
 	return ptr_load;

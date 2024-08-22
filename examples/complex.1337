@@ -1,0 +1,29 @@
+do_print := fn (a : i32, b : i32) i32 {
+	print("this was called asynchronously! (or was it?)")
+	print("how should i know, i'm not a colored function!")
+}
+
+main := fn () {
+	thing := 10
+	thing := 20 # shadowing allowed
+
+	mut sum : i32 = 0 # sum is mutable (immutability is default)
+	sum = 5
+	sum += thing
+	sum -= 5
+
+	mut number := 0
+	number_ptr : *mut i32 = &mut number
+	*number_ptr = 1337
+
+	async do_print()
+
+	manual_allocation : *i32 = alloc<i32>() # not sure yet
+	defer free(manual_allocation) # defer will run something in the end of the block
+
+	refcounted_alloc := rcalloc<i32>() # not sure yet
+	# will automatically decrease refcount in the end of the block
+
+	atomic_ref_alloc := arcalloc<i32>() # not sure yet
+	# will have atomic reference counting (good for multithreaded processes)
+}

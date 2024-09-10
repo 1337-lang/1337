@@ -21,4 +21,22 @@ main := fn (argc: i32, argv: []str) {
 	if 3 * 5 % 7 <= 5 && a + b - 10 > 0 {
 		print("something is true")
 	}
+
+	if a == 10 {
+		
+	} elif a == 20 {
+		
+	} elif a == 30 {
+		
+	} else {
+		
+	}
+
+	while a > 0 {
+		a = a - 1
+	}
+
+	for a in 0..10 {
+		
+	}
 }

@@ -86,6 +86,12 @@ impl Lexer {
         match ident_str.as_str() {
             "fn" => TokenKind::Fn,
             "mut" => TokenKind::Mut,
+            "if" => TokenKind::If,
+            "elif" => TokenKind::Elif,
+            "else" => TokenKind::Else,
+            "for" => TokenKind::For,
+            "in" => TokenKind::In,
+            "while" => TokenKind::While,
             _ => TokenKind::Identifier(ident_str),
         }
     }

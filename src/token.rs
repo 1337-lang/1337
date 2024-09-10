@@ -11,6 +11,12 @@ pub enum TokenKind {
     // Keywords
     Fn,
     Mut,
+    If,
+    Else,
+    Elif,
+    For,
+    In,
+    While,
 
     // Symbols
     LeftCurly,

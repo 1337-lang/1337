@@ -126,6 +126,61 @@ impl Lexer {
         TokenKind::Invalid(character)
     }
 
+    fn symbol_lookup(symbol: &str) -> Option<TokenKind> {
+        match symbol {
+            "{" => Some(TokenKind::LeftCurly),
+            "}" => Some(TokenKind::RightCurly),
+            "(" => Some(TokenKind::LeftParen),
+            ")" => Some(TokenKind::RightParen),
+            "[" => Some(TokenKind::LeftBracket),
+            "]" => Some(TokenKind::RightBracket),
+            "," => Some(TokenKind::Colon),
+            // Boolean Operators
+            "!" => Some(TokenKind::Not),
+            "&&" => Some(TokenKind::And),
+            "||" => Some(TokenKind::Or),
+            "==" => Some(TokenKind::Equals),
+            "!=" => Some(TokenKind::NotEquals),
+            "<" => Some(TokenKind::LowerThan),
+            "<=" => Some(TokenKind::LowerEquals),
+            ">" => Some(TokenKind::GreaterThan),
+            ">=" => Some(TokenKind::GreaterEquals),
+            // Bitwise Operators
+            "~" => Some(TokenKind::BitNot),
+            "&" => Some(TokenKind::BitAnd),
+            "|" => Some(TokenKind::BitOr),
+            "^" => Some(TokenKind::BitXor),
+            // Binary Operators
+            ":=" => Some(TokenKind::Declaratation),
+            "=" => Some(TokenKind::Assignment),
+            "+" => Some(TokenKind::Plus),
+            "-" => Some(TokenKind::Minus),
+            "*" => Some(TokenKind::Times),
+            "/" => Some(TokenKind::DividedBy),
+            "%" => Some(TokenKind::Modulus),
+
+            _ => None,
+        }
+    }
+
+    pub fn tokenize_symbol(&mut self) -> TokenKind {
+        let mut token = String::from(self.current());
+
+        while let Some(c) = self.advance() {
+            // Handle multicharacter symbols by checking
+            // if previous token string + current char is
+            // a new valid symbol
+            let new_token = format!("{}{}", token, c);
+            if Self::symbol_lookup(&new_token).is_none() {
+                break;
+            }
+
+            token = new_token;
+        }
+
+        Self::symbol_lookup(&token).unwrap()
+    }
+
     pub fn next(&mut self) -> Option<Token> {
         let mut c: char;
         loop {
@@ -162,6 +217,13 @@ impl Lexer {
         if c == '\'' {
             return Some(Token {
                 kind: self.tokenize_character(),
+                context,
+            });
+        }
+
+        if Self::symbol_lookup(&String::from(c)).is_some() {
+            return Some(Token {
+                kind: self.tokenize_symbol(),
                 context,
             });
         }

@@ -1,0 +1,10 @@
+[package]
+name = "_1337" # Rust doesn't let the package name start with a digit...
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "1337"
+path = "src/main.rs"
+
+[dependencies]

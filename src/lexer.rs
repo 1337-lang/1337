@@ -49,22 +49,32 @@ impl Lexer {
         }
     }
 
-    fn tokenize_number(&mut self) -> Token {
+    fn tokenize_number(&mut self) -> TokenKind {
         let mut number_str = String::from(self.current());
-        let context = self.token_context();
 
         while let Some(c) = self.advance() {
-            if !c.is_digit(10) {
+            if !c.is_ascii_digit() {
                 break;
             }
 
             number_str.push(c);
         }
 
-        Token {
-            kind: TokenKind::Number(number_str),
-            context,
+        TokenKind::Number(number_str)
+    }
+
+    fn tokenize_identifier(&mut self) -> TokenKind {
+        let mut ident_str = String::from(self.current());
+
+        while let Some(c) = self.advance() {
+            if !c.is_ascii_alphanumeric() && c != '_' {
+                break;
+            }
+
+            ident_str.push(c);
         }
+
+        TokenKind::Identifier(ident_str)
     }
 
     pub fn next(&mut self) -> Option<Token> {
@@ -77,8 +87,20 @@ impl Lexer {
             }
         }
 
-        if c.is_digit(10) {
-            return Some(self.tokenize_number());
+        let context = self.token_context();
+
+        if c.is_ascii_digit() {
+            return Some(Token {
+                kind: self.tokenize_number(),
+                context,
+            });
+        }
+
+        if c.is_ascii_alphabetic() || c == '_' {
+            return Some(Token {
+                kind: self.tokenize_identifier(),
+                context,
+            });
         }
 
         Some(Token {

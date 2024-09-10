@@ -9,4 +9,6 @@ main := fn (argc: i32, argv: []str) {
 	text := "hello world"
 	c := 'a'
 	bad_c := 'abcde'
+
+	_hex_number := 0xdeadbeef
 }

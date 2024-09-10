@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub enum TokenKind {
     Invalid,
-    Identifier,
+    Identifier(String),
 
     Number(String),
     String(String),

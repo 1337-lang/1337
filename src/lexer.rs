@@ -77,6 +77,20 @@ impl Lexer {
         TokenKind::Identifier(ident_str)
     }
 
+    fn tokenize_string(&mut self) -> TokenKind {
+        let mut string = String::new();
+        while let Some(c) = self.advance() {
+            if c == '"' {
+                self.advance();
+                return TokenKind::String(string);
+            }
+
+            string.push(c);
+        }
+
+        TokenKind::Invalid(string)
+    }
+
     pub fn next(&mut self) -> Option<Token> {
         let mut c: char;
         loop {
@@ -103,8 +117,15 @@ impl Lexer {
             });
         }
 
+        if c == '"' {
+            return Some(Token {
+                kind: self.tokenize_string(),
+                context,
+            });
+        }
+
         Some(Token {
-            kind: TokenKind::Invalid,
+            kind: TokenKind::Invalid(c.into()),
             context: TokenContext {
                 source_file: self.source_file.clone(),
                 line: self.line,

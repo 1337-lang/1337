@@ -5,6 +5,7 @@ pub enum TokenKind {
 
     Number(String),
     String(String),
+    Char(String),
 }
 
 #[derive(Debug)]

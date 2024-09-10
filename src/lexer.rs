@@ -91,6 +91,28 @@ impl Lexer {
         TokenKind::Invalid(string)
     }
 
+    fn tokenize_character(&mut self) -> TokenKind {
+        let mut character = String::new();
+        while let Some(c) = self.advance() {
+            if c == '\'' {
+                self.advance();
+
+                // TODO: Support special characters by resolving
+                //       the character string in a separate function
+                //       which will also be reused by `tokenize_string`
+                if character.len() != 1 {
+                    break;
+                }
+
+                return TokenKind::Char(character);
+            }
+
+            character.push(c);
+        }
+
+        TokenKind::Invalid(character)
+    }
+
     pub fn next(&mut self) -> Option<Token> {
         let mut c: char;
         loop {
@@ -120,6 +142,13 @@ impl Lexer {
         if c == '"' {
             return Some(Token {
                 kind: self.tokenize_string(),
+                context,
+            });
+        }
+
+        if c == '\'' {
+            return Some(Token {
+                kind: self.tokenize_character(),
                 context,
             });
         }

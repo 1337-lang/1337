@@ -51,16 +51,25 @@ impl Lexer {
 
     fn tokenize_number(&mut self) -> TokenKind {
         let mut number_str = String::from(self.current());
+        let mut dot_count = 0;
 
         while let Some(c) = self.advance() {
-            if !c.is_ascii_digit() {
+            if !c.is_ascii_digit() && c != '_' && c != '.' {
                 break;
+            }
+
+            if c == '.' {
+                dot_count += 1;
             }
 
             number_str.push(c);
         }
 
-        TokenKind::Number(number_str)
+        if dot_count > 1 {
+            TokenKind::Invalid(number_str)
+        } else {
+            TokenKind::Number(number_str)
+        }
     }
 
     fn tokenize_identifier(&mut self) -> TokenKind {

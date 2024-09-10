@@ -11,4 +11,6 @@ main := fn (argc: i32, argv: []str) {
 	bad_c := 'abcde'
 
 	_hex_number := 0xdeadbeef
+	long_number := 1_000_000_000
+	bad_float := 3.14.15.926.525
 }

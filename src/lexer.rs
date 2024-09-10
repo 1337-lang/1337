@@ -164,21 +164,21 @@ impl Lexer {
     }
 
     pub fn tokenize_symbol(&mut self) -> TokenKind {
-        let mut token = String::from(self.current());
+        let mut symbol = String::from(self.current());
 
         while let Some(c) = self.advance() {
             // Handle multicharacter symbols by checking
             // if previous token string + current char is
             // a new valid symbol
-            let new_token = format!("{}{}", token, c);
-            if Self::symbol_lookup(&new_token).is_none() {
+            let new_symbol = format!("{}{}", symbol, c);
+            if Self::symbol_lookup(&new_symbol).is_none() {
                 break;
             }
 
-            token = new_token;
+            symbol = new_symbol;
         }
 
-        Self::symbol_lookup(&token).unwrap()
+        Self::symbol_lookup(&symbol).unwrap()
     }
 
     pub fn next(&mut self) -> Option<Token> {

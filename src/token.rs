@@ -3,9 +3,14 @@ pub enum TokenKind {
     Invalid(String),
     Identifier(String),
 
+    // Values
     Number(String),
     String(String),
     Char(String),
+
+    // Keywords
+    Fn,
+    Mut,
 }
 
 #[derive(Debug)]

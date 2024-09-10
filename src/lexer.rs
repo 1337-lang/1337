@@ -74,7 +74,11 @@ impl Lexer {
             ident_str.push(c);
         }
 
-        TokenKind::Identifier(ident_str)
+        match ident_str.as_str() {
+            "fn" => TokenKind::Fn,
+            "mut" => TokenKind::Mut,
+            _ => TokenKind::Identifier(ident_str),
+        }
     }
 
     fn tokenize_string(&mut self) -> TokenKind {
